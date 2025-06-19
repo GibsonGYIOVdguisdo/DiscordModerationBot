@@ -27,15 +27,15 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         await interaction.response.send_message(f"Trust of '{role}' set to '{trust}'", ephemeral=True)
 
     @tree.command(name="set_role_value")
-    async def set_role_value(interaction: discord.Interaction, role: discord.Role, trust: int):
+    async def set_role_value(interaction: discord.Interaction, role: discord.Role, value: int):
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message(
                 "You do not have permission to use this command.", ephemeral=True
             )
             return
         
-        database.set_role_value(interaction.guild, role, trust)
-        await interaction.response.send_message(f"Value of '{role}' set to '{trust}'", ephemeral=True)
+        database.set_role_value(interaction.guild, role, value)
+        await interaction.response.send_message(f"Value of '{role}' set to '{value}'", ephemeral=True)
 
     @tree.command(
         name="set_log_channel",
