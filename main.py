@@ -38,6 +38,20 @@ class Database:
         server_document["roleTrust"] = server_document.get("roleTrust", {})
         role_trust = server_document["roleTrust"].get(str(role.id), 0)
         return role_trust
+    
+    def set_role_value(self, guild: discord.Guild, role: discord.Role, trust: int):
+        filter = {"guildId": guild.id}
+        server_document = self.servers.find_one(filter)
+        server_document["roleValue"] = server_document.get("roleValue", {})
+        server_document["roleValue"][str(role.id)] = trust
+        self.servers.find_one_and_replace(filter, server_document)
+
+    def get_role_value(self, guild, role):
+        filter = {"guildId": guild.id}
+        server_document = self.servers.find_one(filter)
+        server_document["roleValue"] = server_document.get("roleValue", {})
+        role_trust = server_document["roleValue"].get(str(role.id), 0)
+        return role_trust
 
         
 intents = discord.Intents.default()
@@ -80,7 +94,18 @@ async def set_role_trust(interaction: discord.Interaction, role: discord.Role, t
         return
     
     database.set_role_trust(interaction.guild, role, trust)
-    await interaction.response.send_message(f"Trust of {role} set to {trust}", ephemeral=True)
+    await interaction.response.send_message(f"Trust of '{role}' set to '{trust}'", ephemeral=True)
+
+@tree.command(name="set_role_value")
+async def set_role_value(interaction: discord.Interaction, role: discord.Role, trust: int):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "You do not have permission to use this command.", ephemeral=True
+        )
+        return
+    
+    database.set_role_value(interaction.guild, role, trust)
+    await interaction.response.send_message(f"Value of '{role}' set to '{trust}'", ephemeral=True)
 
 
 client.run(TOKEN)
