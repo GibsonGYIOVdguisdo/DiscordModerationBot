@@ -72,6 +72,8 @@ class HelperUtils:
             evidence = punishment.get("evidence", "No evidence provided")
             punishment_text = f"**Reason**: {reason}\n**Punisher**: {punisher}\n**Date**: {date}\n**Evidence**: {evidence}"
             embed.add_field(name=punishment_type.upper(), value=punishment_text, inline=False)
+        if len(punishment_list) == 0:
+            embed.add_field(name="**No punishments**", value="")
         return embed
 
     async def log_evidence(self, guild, evidence_embed) -> str:
