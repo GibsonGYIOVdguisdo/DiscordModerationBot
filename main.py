@@ -25,7 +25,6 @@ class Database:
         }
         self.servers.insert_one(server_document)
         
-
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
@@ -49,6 +48,11 @@ async def on_guild_join(guild):
     
 @tree.command(name="reset_guild_settings")
 async def reset_guild_settings(interaction: discord.Interaction):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "You do not have permission to use this command.", ephemeral=True
+        )
+        return
     await database.create_server_document(interaction.guild)
     await interaction.response.send_message(f"All guild settings have been reset")
 
