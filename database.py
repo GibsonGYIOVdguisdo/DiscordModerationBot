@@ -81,11 +81,12 @@ class Database:
         punishment_list = list(self.punishments.find(filter).sort("date", 1))
         return punishment_list
     
-    def get_recently_given_punishments(self, guild: discord.Guild, member: discord.Member=None):
+    def get_recently_given_bans(self, guild: discord.Guild, member: discord.Member=None):
         one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
         recent_punishments = list(self.punishments.find({
             "guildId": guild.id,
             "punisherId": member.id,
+            "punishment": "ban",
             "date": {"$gte": one_hour_ago}
         }))
         return recent_punishments

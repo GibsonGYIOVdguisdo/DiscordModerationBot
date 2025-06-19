@@ -19,7 +19,7 @@ class ApprovalView(discord.ui.View):
         self.approval_data = {"trust": executor_trust, "approvers": set([executor.id])}
     
     def register_ban_approval(self, approver: discord.Member):
-        self.approval_data["trust"] += self.helper_utils
+        self.approval_data["trust"] += self.helper_utils.get_weighted_member_trust(approver)
         self.approval_data["approvers"].add(approver.id)
 
     @discord.ui.button(label="Approve Ban", style=discord.ButtonStyle.green)
@@ -50,7 +50,7 @@ class ApprovalView(discord.ui.View):
         self.register_ban_approval(approver)
 
         if approval_data["trust"] >= self.member_value:
-            await self.client.ban(self.member, reason=self.reason)
+            # await self.client.ban(self.member, reason=self.reason)
             await interaction.response.send_message(f"{self.member.mention} has been banned.", ephemeral=True)
             await self.helper_utils.log_punishment(guild, "ban", self.executor, punished_member, "ban", self.reason, self.evidence)
             del self.pending_approvals[self.member.id]
