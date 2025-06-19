@@ -16,6 +16,26 @@ class HelperUtils:
         self.client = client
         self.database = database
 
+    def count_recently_given_bans(self, member):
+        guild = member.guild
+        punishments = self.database.get_member_punishments(guild, punisher=member)
+        one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
+        recent_punishments = [
+            p for p in punishments
+            if (
+            "date" in p and
+            p.get("punishment", "").lower() == "ban" and
+            datetime.fromisoformat(p["date"]).replace(tzinfo=timezone.utc) >= one_hour_ago
+            )
+        ]
+        return len(recent_punishments)
+
+    def get_weighted_member_trust(self, member: discord.Member) -> int:
+        member_trust = self.get_member_trust(member)
+        reduction = self.count_recently_given_bans(member)
+        member_trust = max(member_trust - reduction, 0)
+        return member_trust
+
     def get_member_trust(self, member: discord.Member) -> int:
         guild = member.guild
         member_trust = -1

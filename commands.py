@@ -3,8 +3,11 @@ from discord import app_commands
 from database import Database
 from helper_utils import HelperUtils
 from datetime import datetime, timedelta, timezone
+from collections import defaultdict
 
 def setup_commands(tree: app_commands.CommandTree, database: Database, helper_utils: HelperUtils):
+    pending_approvals = defaultdict(lambda: {"trust": 0, "approvers": set()})
+
     @tree.command(name="reset_guild_settings")
     async def reset_guild_settings(interaction: discord.Interaction):
         if not interaction.user.guild_permissions.administrator:
@@ -44,6 +47,8 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             app_commands.Choice(name="Warns", value="warns"),
             app_commands.Choice(name="Mutes", value="mutes"),
             app_commands.Choice(name="Evidence", value="evidence"),
+            app_commands.Choice(name="Bans", value="bans"),
+            app_commands.Choice(name="Ban Requests", value="ban-requests"),
         ]
     )
     async def set_log_channel(interaction: discord.Interaction, log_type: app_commands.Choice[str], channel: discord.TextChannel):
@@ -131,6 +136,38 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             await helper_utils.log_punishment(guild, "mutes", executor, punished_member, duration.name, reason, evidence_embed)
         else:
             await interaction.response.send_message(f"❌ go away you cant do that", ephemeral=True)
+
+    @tree.command(
+        name="betterban",
+        description="Ban a user from the server",
+    )
+    @app_commands.choices(
+        evidence=helper_utils.EvidenceChoices
+    )
+    async def betterban(interaction: discord.Interaction, member: discord.Member, reason: str, evidence: app_commands.Choice[str]):
+        guild = interaction.guild
+        executor = interaction.guild.get_member(interaction.user.id)
+        punished_member = member
+        executor_trust = helper_utils.get_weighted_member_trust(executor)
+        member_trust = helper_utils.get_member_trust(punished_member)
+        member_value = helper_utils.get_member_value(punished_member)
+        evidence_type = evidence.value
+
+        if executor_trust < 0:
+            await interaction.response.send_message("You do not have permission", ephemeral=True)
+            return
+        
+        if member_trust >= 0:
+            await interaction.response.send_message("You can not ban staff members", ephemeral=True)
+            return
+        
+        if executor_trust >= member_value:
+            await member.ban(delete_message_days=1, reason=reason)
+            await interaction.response.send_message(f"{member.mention} has been banned", ephemeral=True)
+            evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
+            await helper_utils.log_punishment(guild, "bans", executor, punished_member, "ban", reason, evidence_embed)
+
+
 
     @tree.command(
         name="punishments",

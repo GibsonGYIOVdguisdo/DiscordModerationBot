@@ -70,12 +70,13 @@ class Database:
         }
         self.punishments.insert_one(punishment_document)
 
-    def get_member_punishments(self, guild: discord.Guild, member: discord.Member=None, member_id=-1) -> list[object]:
-        if member_id == -1:
-            member_id = member.id
-        filter = {
-            "guildId": guild.id, 
-            "memberId": member_id
-        }
+    def get_member_punishments(self, guild: discord.Guild, member: discord.Member=None, member_id=-1, punisher: discord.Member=None) -> list[object]:
+        filter = {"guildId": guild.id}
+        if member or member_id:
+            if (member):
+                member_id = member.id
+            filter["memberId"] = member_id
+        if punisher:
+            filter["punisherId"] = punisher.id
         punishment_list = list(self.punishments.find(filter).sort("date", 1))
         return punishment_list
