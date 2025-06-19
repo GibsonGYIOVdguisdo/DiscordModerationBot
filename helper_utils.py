@@ -76,12 +76,14 @@ class HelperUtils:
         return evidence_message
 
 
-    async def log_punishment(self, guild: discord.Guild, log_type: str, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence_embed:discord.Embed=None):
+    async def log_punishment(self, guild: discord.Guild, log_type: str, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence_embed:discord.Embed=None, evidence_link:str=""):
         log_channel_id = self.database.get_log_channel(guild, log_type)
         
         log_channel = guild.get_channel(log_channel_id) 
-
-        evidence_message = await self.log_evidence(guild, evidence_embed)
+        if evidence_link:
+            evidence_message=evidence_link
+        elif evidence_embed:
+            evidence_message = await self.log_evidence(guild, evidence_embed)
 
         embed = discord.Embed(title=punishment)
 

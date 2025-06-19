@@ -159,18 +159,19 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             await interaction.response.send_message("You can not ban staff members", ephemeral=True)
             return
         
+        evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
         if executor_trust >= member_value:
-            await member.ban(delete_message_days=1, reason=reason)
+            # await member.ban(delete_message_days=1, reason=reason)
             await interaction.response.send_message(f"{member.mention} has been banned", ephemeral=True)
-            evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
             await helper_utils.log_punishment(guild, "bans", executor, punished_member, "ban", reason, evidence_embed)
         else:
             approval_channel_id = database.get_log_channel(guild, "ban-requests")
             approval_channel = guild.get_channel(approval_channel_id)
-            evidence_message = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
-            view = ApprovalView(client, executor, punished_member, reason, evidence, helper_utils)
+            # MAKE IT SEND EVIDENCE AND INCLUDE APPROVALS IN REMOVED TRUST
+            evidence_link = await helper_utils.log_evidence(guild, evidence_embed)
+            view = ApprovalView(client, executor, punished_member, reason, evidence_link, helper_utils)
             view.request_message = await approval_channel.send(
-                f"{executor.mention} requested a ban on {member.mention}. Trust required: {member_value}. Current trust: {executor_trust}. Evidence: {evidence_message}. Reason: '{reason}'. Approve below.",
+                f"{executor.mention} requested a ban on {member.mention}. Trust required: {member_value}. Current trust: {executor_trust}. Evidence: {evidence_link}. Reason: '{reason}'. Approve below.",
                 view=view
             )
             await interaction.response.send_message("Ban request submitted for approval.", ephemeral=True)
