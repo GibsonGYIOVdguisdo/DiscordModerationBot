@@ -1,0 +1,18 @@
+import discord
+from discord import app_commands
+from database import Database
+
+
+def setup_events(client: discord.Client, tree: app_commands.CommandTree, database: Database):
+    @client.event
+    async def on_ready():
+        print(f"Logged in as {client.user}")
+        try:
+            synced = await tree.sync()
+            print(f"Synced {len(synced)} command(s)")
+        except Exception as e:
+            print(f"Failed to sync commands: {e}")
+
+    @client.event
+    async def on_guild_join(guild):
+        database.create_server_document(guild)
