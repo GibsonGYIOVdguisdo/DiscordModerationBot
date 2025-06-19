@@ -1,10 +1,11 @@
 import os
 from dotenv import load_dotenv
 import discord
-from database import Database
 from discord import app_commands
+from database import Database
 from events import setup_events
 from commands import setup_commands
+from helper_utils import HelperUtils
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
@@ -21,7 +22,9 @@ intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 database = Database(MONGO_URI)
-setup_events(client, tree, database)
-setup_commands(tree, database)
+helper_utils = HelperUtils(client, database)
+
+setup_events(client, tree, database, helper_utils)
+setup_commands(tree, database, helper_utils)
 
 client.run(TOKEN)

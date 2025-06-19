@@ -21,11 +21,11 @@ class Database:
         server_document["roleTrusts"][str(role.id)] = trust
         self.servers.find_one_and_replace(filter, server_document)
 
-    def get_role_trust(self, guild: discord.Guild, role: discord.Role):
+    def get_role_trust(self, guild: discord.Guild, role: discord.Role) -> int:
         filter = {"guildId": guild.id}
         server_document = self.servers.find_one(filter)
         server_document["roleTrusts"] = server_document.get("roleTrusts", {})
-        role_trust = server_document["roleTrusts"].get(str(role.id), 0)
+        role_trust = server_document["roleTrusts"].get(str(role.id), -1)
         return role_trust
     
     def set_role_value(self, guild: discord.Guild, role: discord.Role, trust: int):
@@ -35,12 +35,12 @@ class Database:
         server_document["roleValues"][str(role.id)] = trust
         self.servers.find_one_and_replace(filter, server_document)
 
-    def get_role_value(self, guild: discord.Guild, role: discord.Role):
+    def get_role_value(self, guild: discord.Guild, role: discord.Role) -> int:
         filter = {"guildId": guild.id}
         server_document = self.servers.find_one(filter)
         server_document["roleValues"] = server_document.get("roleValues", {})
-        role_trust = server_document["roleValues"].get(str(role.id), 0)
-        return role_trust
+        role_value = server_document["roleValues"].get(str(role.id), -1)
+        return role_value
     
     def set_log_channel(self, guild: discord.Guild, log_type: str, channel: discord.TextChannel):
         filter = {"guildId": guild.id}
@@ -48,3 +48,11 @@ class Database:
         server_document["logChannels"] = server_document.get("logChannels", {})
         server_document["logChannels"][log_type] = channel.id
         self.servers.find_one_and_replace(filter, server_document)
+
+    def get_log_channel(self, guild: discord.Guild, log_type: str) -> int:
+        filter = {"guildId": guild.id}
+        server_document = self.servers.find_one(filter)
+        server_document["logChannels"] = server_document.get("logChannels", {})
+        log_channel = server_document["logChannels"].get(log_type, -1)
+        return log_channel
+        
