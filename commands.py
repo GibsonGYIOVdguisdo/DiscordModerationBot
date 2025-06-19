@@ -188,8 +188,11 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         guild = interaction.guild
         executor = interaction.guild.get_member(interaction.user.id)
         executor_trust = helper_utils.get_member_trust(executor)
-        if executor_trust >= 0:
-            embed = helper_utils.get_punishment_embed(guild, member, int(member_id))
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-        else:
+        if executor_trust < 0:
             await interaction.response.send_message("You do not have permission", ephemeral=True)
+            return
+        if not member and member_id == "-1":
+            await interaction.response.send_message("Please provide a member or member id", ephemeral=True)
+            return
+        embed = helper_utils.get_punishment_embed(guild, member, int(member_id))
+        await interaction.response.send_message(embed=embed, ephemeral=True)
