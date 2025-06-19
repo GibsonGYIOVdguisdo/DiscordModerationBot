@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from database import Database
 from helper_utils import HelperUtils
+from datetime import datetime, timedelta, timezone
 
 def setup_commands(tree: app_commands.CommandTree, database: Database, helper_utils: HelperUtils):
     @tree.command(name="reset_guild_settings")
@@ -41,6 +42,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
     @app_commands.choices(
         log_type=[
             app_commands.Choice(name="Warns", value="warns"),
+            app_commands.Choice(name="Mutes", value="mutes"),
             app_commands.Choice(name="Evidence", value="evidence"),
         ]
     )
@@ -67,16 +69,68 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         executor_trust = helper_utils.get_member_trust(executor)
         punished_member_trust = helper_utils.get_member_trust(punished_member)
         if executor_trust >= 0 and executor_trust > punished_member_trust:
-            evidence_type = evidence.value
-            evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
             try:
                 await punished_member.send(f"You have been warned in {interaction.guild.name} for '{reason}'")
             except Exception as e:
                 print(e)
-            await helper_utils.log_punishment(guild, "warns", executor, punished_member, "warning", reason, evidence_embed)
             await interaction.response.send_message(f"Successfully warned {punished_member.mention} for '{reason}'", ephemeral=True)
+            evidence_type = evidence.value
+            evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
+            await helper_utils.log_punishment(guild, "warns", executor, punished_member, "warning", reason, evidence_embed)
         else:
             await interaction.response.send_message("You do not have permission", ephemeral=True)
+
+    @tree.command(
+        name="bettermute",
+        description="Mute a user in the server for a specified duration",
+    )
+    @app_commands.describe(
+        member="The member to mute",
+        duration="Duration of the mute",
+        reason="Reason for the mute"
+    )
+    @app_commands.choices(
+        duration=[
+            app_commands.Choice(name="5 minutes", value="5m"),
+            app_commands.Choice(name="6 hour", value="6h"),
+            app_commands.Choice(name="24 hour", value="24h")
+        ],
+        evidence=helper_utils.EvidenceChoices
+    )
+    async def bettermute(interaction: discord.Interaction, member: discord.Member, duration: app_commands.Choice[str], reason: str, evidence: app_commands.Choice[str]):
+        guild = interaction.guild
+        executor = interaction.guild.get_member(interaction.user.id)
+        punished_member = member
+        executor_trust = helper_utils.get_member_trust(executor)
+        member_trust = helper_utils.get_member_trust(punished_member)
+
+        if executor_trust >= 0 and executor_trust > member_trust:
+            duration_mapping = {
+                "5m": 5,
+                "6h": 360,
+                "24h": 1440
+            }
+            mute_minutes = duration_mapping.get(duration.value)
+            evidence_type = evidence.value
+
+            try:
+                await member.send(f"You have been muted in {interaction.guild.name} for '{reason}'")
+            except Exception as e:
+                print(e)
+
+            now = datetime.now()
+            now += timedelta(minutes=mute_minutes)
+            await member.timeout(now.astimezone())
+            
+
+            await interaction.response.send_message(
+                f"Successfully muted {member.mention} for {duration.name} due to '{reason}'.", ephemeral=True
+            )
+            
+            evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
+            await helper_utils.log_punishment(guild, "mutes", executor, punished_member, duration.name, reason, evidence_embed)
+        else:
+            await interaction.response.send_message(f"❌ go away you cant do that", ephemeral=True)
 
     @tree.command(
         name="punishments",
@@ -84,13 +138,13 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
     async def punishments(
         interaction: discord.Interaction,
         member: discord.Member = None,
-        member_id: int = None
+        member_id: str = "-1"
     ):
         guild = interaction.guild
         executor = interaction.guild.get_member(interaction.user.id)
         executor_trust = helper_utils.get_member_trust(executor)
         if executor_trust >= 0:
-            embed = helper_utils.get_punishment_embed(guild, member, member_id)
+            embed = helper_utils.get_punishment_embed(guild, member, int(member_id))
             await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
             await interaction.response.send_message("You do not have permission", ephemeral=True)

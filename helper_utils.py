@@ -37,9 +37,8 @@ class HelperUtils:
         
 
     def get_punishment_embed(self, guild: discord.Guild, member: discord.Member = None, member_id: int = -1) -> discord.Embed:
-        if not member:
-            member = member_id
-        embed = discord.Embed(title=f"{member} punishments")
+
+        embed = discord.Embed(title=f"{member or member_id} punishments")
         punishment_list = self.database.get_member_punishments(guild, member, member_id)[:10]
         for punishment in punishment_list:
             punishment_type = f"**{punishment["punishment"]}**"
