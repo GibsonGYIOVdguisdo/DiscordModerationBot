@@ -27,7 +27,7 @@ class HelperUtils:
     def format_member_string(cls, member: discord.Member) -> str:
         return f"{member.name} ({member.id})"
         
-    async def log_punishment(self, guild: discord.Guild, log_type: str, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str) -> list[object]:
+    async def log_punishment(self, guild: discord.Guild, log_type: str, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str):
         log_channel_id = self.database.get_log_channel(guild, log_type)
         log_channel = guild.get_channel(log_channel_id)
         embed = discord.Embed(title=punishment)
