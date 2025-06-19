@@ -17,27 +17,34 @@ class Database:
     def set_role_trust(self, guild: discord.Guild, role: discord.Role, trust: int):
         filter = {"guildId": guild.id}
         server_document = self.servers.find_one(filter)
-        server_document["roleTrust"] = server_document.get("roleTrust", {})
-        server_document["roleTrust"][str(role.id)] = trust
+        server_document["roleTrusts"] = server_document.get("roleTrusts", {})
+        server_document["roleTrusts"][str(role.id)] = trust
         self.servers.find_one_and_replace(filter, server_document)
 
-    def get_role_trust(self, guild, role):
+    def get_role_trust(self, guild: discord.Guild, role: discord.Role):
         filter = {"guildId": guild.id}
         server_document = self.servers.find_one(filter)
-        server_document["roleTrust"] = server_document.get("roleTrust", {})
-        role_trust = server_document["roleTrust"].get(str(role.id), 0)
+        server_document["roleTrusts"] = server_document.get("roleTrusts", {})
+        role_trust = server_document["roleTrusts"].get(str(role.id), 0)
         return role_trust
     
     def set_role_value(self, guild: discord.Guild, role: discord.Role, trust: int):
         filter = {"guildId": guild.id}
         server_document = self.servers.find_one(filter)
-        server_document["roleValue"] = server_document.get("roleValue", {})
-        server_document["roleValue"][str(role.id)] = trust
+        server_document["roleValues"] = server_document.get("roleValues", {})
+        server_document["roleValues"][str(role.id)] = trust
         self.servers.find_one_and_replace(filter, server_document)
 
-    def get_role_value(self, guild, role):
+    def get_role_value(self, guild: discord.Guild, role: discord.Role):
         filter = {"guildId": guild.id}
         server_document = self.servers.find_one(filter)
-        server_document["roleValue"] = server_document.get("roleValue", {})
-        role_trust = server_document["roleValue"].get(str(role.id), 0)
+        server_document["roleValues"] = server_document.get("roleValues", {})
+        role_trust = server_document["roleValues"].get(str(role.id), 0)
         return role_trust
+    
+    def set_log_channel(self, guild: discord.Guild, log_type: str, channel: discord.TextChannel):
+        filter = {"guildId": guild.id}
+        server_document = self.servers.find_one(filter)
+        server_document["logChannels"] = server_document.get("logChannels", {})
+        server_document["logChannels"][log_type] = channel.id
+        self.servers.find_one_and_replace(filter, server_document)

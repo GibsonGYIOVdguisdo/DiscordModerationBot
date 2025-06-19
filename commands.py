@@ -35,3 +35,20 @@ def setup_commands(tree: app_commands.CommandTree, database: Database):
         
         database.set_role_value(interaction.guild, role, trust)
         await interaction.response.send_message(f"Value of '{role}' set to '{trust}'", ephemeral=True)
+
+    @tree.command(
+        name="set_log_channel",
+    )
+    @app_commands.choices(
+        log_type=[
+            app_commands.Choice(name="Warns", value="warns"),
+        ]
+    )
+    async def set_log_channel(interaction: discord.Interaction, log_type: app_commands.Choice[str], channel: discord.TextChannel):
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "You do not have permission to use this command.", ephemeral=True
+            )
+            return
+        database.set_log_channel(interaction.guild, log_type.value, channel)
+        await interaction.response.send_message(f"Log channel for '{log_type.name}' set to {channel.jump_url}", ephemeral=True)
