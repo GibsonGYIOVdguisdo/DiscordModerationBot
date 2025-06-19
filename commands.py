@@ -41,6 +41,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
     @app_commands.choices(
         log_type=[
             app_commands.Choice(name="Warns", value="warns"),
+            app_commands.Choice(name="Evidence", value="evidence"),
         ]
     )
     async def set_log_channel(interaction: discord.Interaction, log_type: app_commands.Choice[str], channel: discord.TextChannel):
@@ -56,18 +57,23 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         name="betterwarn",
         description="Sends a warning to a user",
     )
-    async def betterwarn(interaction: discord.Interaction, member: discord.Member, reason: str):
+    @app_commands.choices(
+        evidence=helper_utils.EvidenceChoices
+    )
+    async def betterwarn(interaction: discord.Interaction, member: discord.Member, reason: str, evidence: app_commands.Choice[str]):
         punished_member = member
         guild = interaction.guild
         executor = interaction.guild.get_member(interaction.user.id)
         executor_trust = helper_utils.get_member_trust(executor)
         punished_member_trust = helper_utils.get_member_trust(punished_member)
         if executor_trust >= 0 and executor_trust > punished_member_trust:
+            evidence_type = evidence.value
+            evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
             try:
                 await punished_member.send(f"You have been warned in {interaction.guild.name} for '{reason}'")
             except Exception as e:
                 print(e)
-            await helper_utils.log_punishment(guild, "warns", executor, punished_member, "warning", reason)
+            await helper_utils.log_punishment(guild, "warns", executor, punished_member, "warning", reason, evidence_embed)
             await interaction.response.send_message(f"Successfully warned {punished_member.mention} for '{reason}'", ephemeral=True)
         else:
             await interaction.response.send_message("You do not have permission", ephemeral=True)

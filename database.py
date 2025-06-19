@@ -58,13 +58,14 @@ class Database:
         log_channel = server_document["logChannels"].get(log_type, -1)
         return log_channel
         
-    def add_member_punishment(self, guild: discord.Guild, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str):
+    def add_member_punishment(self, guild: discord.Guild, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence: str):
         punishment_document = {
             "guildId": guild.id,
             "memberId": punished_member.id,
             "punisherId": executing_member.id,
             "punishment": punishment,
             "reason": reason,
+            "evidence": evidence,
             "date": datetime.now()
         }
         self.punishments.insert_one(punishment_document)
