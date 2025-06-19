@@ -36,6 +36,7 @@ class HelperUtils:
         embed.add_field(name="punisher", value=HelperUtils.format_member_string(executing_member), inline=False)
         embed.add_field(name="punishment", value=punishment, inline=False)
         embed.add_field(name="reason", value=reason, inline=False)
-
+        self.database.add_member_punishment(guild, executing_member, punished_member, punishment, reason)
+        
         await log_channel.send(embed=embed)
 

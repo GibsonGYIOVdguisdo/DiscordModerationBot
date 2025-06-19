@@ -1,11 +1,13 @@
 from pymongo import MongoClient
 import discord
+from datetime import datetime
 
 class Database:
     def __init__(self, mongo_uri):
         self.mongo_client = MongoClient(mongo_uri)
         self.db = self.mongo_client['ModerationBot']
         self.servers = self.db["servers"]
+        self.punishments = self.db["punishments"]
         
     def create_server_document(self, guild: discord.Guild):
         self.servers.find_one_and_delete({"guildId": guild.id})
@@ -56,3 +58,20 @@ class Database:
         log_channel = server_document["logChannels"].get(log_type, -1)
         return log_channel
         
+    def add_member_punishment(self, guild: discord.Guild, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str):
+        punishment_document = {
+            "guildId": guild.id,
+            "memberId": punished_member.id,
+            "punisherId": executing_member.id,
+            "punishment": punishment,
+            "reason": reason,
+            "date": datetime.now()
+        }
+        self.punishments.insert_one(punishment_document)
+
+    def get_member_punishments(self, guild, member):
+        filter = {
+            "guildId": guild.id, 
+            "memberId": member.id
+        }
+        self.punishments.find(filter)
