@@ -18,7 +18,7 @@ class HelperUtils:
 
     def count_recently_given_bans(self, member: discord.Member) -> int:
         guild = member.guild
-        punishments = self.database.get_recently_given_punishments(guild, member)
+        punishments = self.database.get_recently_given_bans(guild, member)
         return len(punishments)
 
     def get_weighted_member_trust(self, member: discord.Member) -> int:
