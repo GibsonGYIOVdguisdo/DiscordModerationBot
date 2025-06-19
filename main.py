@@ -18,12 +18,27 @@ class Database:
         self.db = self.mongo_client['ModerationBot']
         self.servers = self.db["servers"]
         
-    async def create_server_document(self, guild:discord.Guild):
+    def create_server_document(self, guild: discord.Guild):
         self.servers.find_one_and_delete({"guildId": guild.id})
         server_document = {
             "guildId": guild.id
         }
         self.servers.insert_one(server_document)
+
+    def set_role_trust(self, guild: discord.Guild, role: discord.Role, trust: int):
+        filter = {"guildId": guild.id}
+        server_document = self.servers.find_one(filter)
+        server_document["roleTrust"] = server_document.get("roleTrust", {})
+        server_document["roleTrust"][str(role.id)] = trust
+        self.servers.find_one_and_replace(filter, server_document)
+
+    def get_role_trust(self, guild, role):
+        filter = {"guildId": guild.id}
+        server_document = self.servers.find_one(filter)
+        server_document["roleTrust"] = server_document.get("roleTrust", {})
+        role_trust = server_document["roleTrust"].get(str(role.id), 0)
+        return role_trust
+
         
 intents = discord.Intents.default()
 intents.message_content = True
@@ -44,7 +59,7 @@ async def on_ready():
 
 @client.event
 async def on_guild_join(guild):
-    await database.create_server_document(guild)
+    database.create_server_document(guild)
     
 @tree.command(name="reset_guild_settings")
 async def reset_guild_settings(interaction: discord.Interaction):
@@ -53,7 +68,19 @@ async def reset_guild_settings(interaction: discord.Interaction):
             "You do not have permission to use this command.", ephemeral=True
         )
         return
-    await database.create_server_document(interaction.guild)
-    await interaction.response.send_message(f"All guild settings have been reset")
+    database.create_server_document(interaction.guild)
+    await interaction.response.send_message(f"All guild settings have been reset", ephemeral=True)
+
+@tree.command(name="set_role_trust")
+async def set_role_trust(interaction: discord.Interaction, role: discord.Role, trust: int):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "You do not have permission to use this command.", ephemeral=True
+        )
+        return
+    
+    database.set_role_trust(interaction.guild, role, trust)
+    await interaction.response.send_message(f"Trust of {role} set to {trust}", ephemeral=True)
+
 
 client.run(TOKEN)
