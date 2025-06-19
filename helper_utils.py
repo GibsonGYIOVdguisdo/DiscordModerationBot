@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from database import Database
 import asyncio
+from datetime import datetime, timedelta, timezone
 
 class HelperUtils:
     EvidenceChoices = [
@@ -26,6 +27,8 @@ class HelperUtils:
     def get_member_value(self, member: discord.Member) -> int:
         guild = member.guild
         member_value = 0
+        if (datetime.now(timezone.utc) - member.joined_at).total_seconds() > 86400:
+            member_value = 1
         for role in member.roles:
             role_trust = self.database.get_role_value(guild, role)
             member_value = max(member_value, role_trust)
