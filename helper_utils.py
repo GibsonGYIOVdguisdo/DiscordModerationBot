@@ -27,6 +27,24 @@ class HelperUtils:
     def format_member_string(cls, member: discord.Member) -> str:
         return f"{member.name} ({member.id})"
         
+    def get_punishment_embed(self, guild: discord.Guild, member: discord.Member = None, member_id: int = -1) -> discord.Embed:
+        if not member:
+            member = member_id
+        embed = discord.Embed(title=f"{member} punishments")
+        punishment_list = self.database.get_member_punishments(guild, member, member_id)[:10]
+        for punishment in punishment_list:
+            punishment_type = f"**{punishment["punishment"]}**"
+            reason = punishment["reason"]
+            try:
+                punisher = guild.get_member(punishment["punisherId"])
+            except:
+                punisher = "Left server"
+            date = punishment["date"]
+            punishment_text = f"**Reason**: {reason}\n**Punisher**: {punisher}\n**Date**: {date}"
+            embed.add_field(name=punishment_type.upper(), value=punishment_text, inline=False)
+        return embed
+            
+
     async def log_punishment(self, guild: discord.Guild, log_type: str, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str):
         log_channel_id = self.database.get_log_channel(guild, log_type)
         log_channel = guild.get_channel(log_channel_id)

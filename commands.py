@@ -71,3 +71,20 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             await interaction.response.send_message(f"Successfully warned {punished_member.mention} for '{reason}'", ephemeral=True)
         else:
             await interaction.response.send_message("You do not have permission", ephemeral=True)
+
+    @tree.command(
+        name="punishments",
+    )
+    async def punishments(
+        interaction: discord.Interaction,
+        member: discord.Member = None,
+        member_id: int = None
+    ):
+        guild = interaction.guild
+        executor = interaction.guild.get_member(interaction.user.id)
+        executor_trust = helper_utils.get_member_trust(executor)
+        if executor_trust >= 0:
+            embed = helper_utils.get_punishment_embed(guild, member, member_id)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+        else:
+            await interaction.response.send_message("You do not have permission", ephemeral=True)
