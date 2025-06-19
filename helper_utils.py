@@ -16,7 +16,7 @@ class HelperUtils:
         self.client = client
         self.database = database
 
-    def count_recently_given_bans(self, member):
+    def count_recently_given_bans(self, member) -> int:
         guild = member.guild
         punishments = self.database.get_member_punishments(guild, punisher=member)
         one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
@@ -58,9 +58,7 @@ class HelperUtils:
     def format_member_string(cls, member: discord.Member) -> str:
         return f"{member.name} ({member.id})"
         
-
     def get_punishment_embed(self, guild: discord.Guild, member: discord.Member = None, member_id: int = -1) -> discord.Embed:
-
         embed = discord.Embed(title=f"{member or member_id} punishments")
         punishment_list = self.database.get_member_punishments(guild, member, member_id)[:10]
         for punishment in punishment_list:
@@ -76,15 +74,21 @@ class HelperUtils:
             embed.add_field(name=punishment_type.upper(), value=punishment_text, inline=False)
         return embed
 
-    async def log_punishment(self, guild: discord.Guild, log_type: str, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence_embed:discord.Embed=None):
-        log_channel_id = self.database.get_log_channel(guild, log_type)
-        log_channel = guild.get_channel(log_channel_id)
-
-        evidence_message = "no evidence provided"
+    async def log_evidence(self, guild, evidence_embed) -> str:
+        evidence_message = "No evidence provided"
         if evidence_embed:
             evidence_channel_id = self.database.get_log_channel(guild, "evidence")
             evidence_channel = guild.get_channel(evidence_channel_id)
             evidence_message = (await evidence_channel.send(embed=evidence_embed)).jump_url
+        return evidence_message
+
+
+    async def log_punishment(self, guild: discord.Guild, log_type: str, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence_embed:discord.Embed=None):
+        log_channel_id = self.database.get_log_channel(guild, log_type)
+        
+        log_channel = guild.get_channel(log_channel_id) 
+
+        evidence_message = await self.log_evidence(guild, evidence_embed)
 
         embed = discord.Embed(title=punishment)
 

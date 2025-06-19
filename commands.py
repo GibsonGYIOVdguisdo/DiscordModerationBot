@@ -3,11 +3,9 @@ from discord import app_commands
 from database import Database
 from helper_utils import HelperUtils
 from datetime import datetime, timedelta, timezone
-from collections import defaultdict
+from approval_view import ApprovalView
 
-def setup_commands(tree: app_commands.CommandTree, database: Database, helper_utils: HelperUtils):
-    pending_approvals = defaultdict(lambda: {"trust": 0, "approvers": set()})
-
+def setup_commands(tree: app_commands.CommandTree, database: Database, helper_utils: HelperUtils, client: discord.Client):
     @tree.command(name="reset_guild_settings")
     async def reset_guild_settings(interaction: discord.Interaction):
         if not interaction.user.guild_permissions.administrator:
@@ -166,6 +164,16 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             await interaction.response.send_message(f"{member.mention} has been banned", ephemeral=True)
             evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
             await helper_utils.log_punishment(guild, "bans", executor, punished_member, "ban", reason, evidence_embed)
+        else:
+            approval_channel_id = database.get_log_channel(guild, "ban-requests")
+            approval_channel = guild.get_channel(approval_channel_id)
+            evidence_message = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
+            view = ApprovalView(client, executor, punished_member, reason, evidence, helper_utils)
+            view.request_message = await approval_channel.send(
+                f"{executor.mention} requested a ban on {member.mention}. Trust required: {member_value}. Current trust: {executor_trust}. Evidence: {evidence_message}. Reason: '{reason}'. Approve below.",
+                view=view
+            )
+            await interaction.response.send_message("Ban request submitted for approval.", ephemeral=True)
 
 
 

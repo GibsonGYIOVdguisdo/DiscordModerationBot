@@ -25,6 +25,6 @@ database = Database(MONGO_URI)
 helper_utils = HelperUtils(client, database)
 
 setup_events(client, tree, database, helper_utils)
-setup_commands(tree, database, helper_utils)
+setup_commands(tree, database, helper_utils, client)
 
 client.run(TOKEN)
