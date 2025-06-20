@@ -24,7 +24,7 @@ class ApprovalView(discord.ui.View):
         self.trust += self.helper_utils.get_weighted_member_trust(member)
         self.approvers.add(member.id)
 
-    def register_ban_denial(self, member: discord.Member):
+    async def register_ban_denial(self, member: discord.Member):
         self.trust -= self.helper_utils.get_weighted_member_trust(member)
         self.deniers.add(member.id)
 
@@ -78,7 +78,7 @@ class ApprovalView(discord.ui.View):
     @discord.ui.button(label="Deny Ban", style=discord.ButtonStyle.red)
     async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
         denying_member = interaction.guild.get_member(interaction.user.id)
-        
+
         if not denying_member:
             await interaction.response.send_message("Could not retrieve your member data.", ephemeral=True)
             return
@@ -98,13 +98,12 @@ class ApprovalView(discord.ui.View):
             await interaction.response.send_message("You have already voted on this ban.", ephemeral=True)
             return
         
+        self.register_ban_denial(denying_member)
         
         if self.trust < 0:
             await self.request_message.delete() 
             await interaction.response.send_message(f"Ban request for {self.member.mention} has been cancelled due to low trust.", ephemeral=True)
             return
-        
-        self.register_ban_denial()
         
         await self.request_message.edit(
             content=f"{self.executor.mention} requested a ban on {self.member.mention}. Trust required: {self.member_value}. Current trust: {self.trust} / {self.member_value}. Reason: '{self.reason}'. Approve below."
