@@ -13,7 +13,7 @@ class StaffVoteView(discord.ui.View):
         self.helper_utils = helper_utils
         self.approvers = set([vote_owner])
         self.deniers = set()
-        self.combined_trust = 0
+        self.combined_trust = helper_utils.get_weighted_member_trust(vote_owner)
         self.required_trust = required_trust
         self._auto_delete_task = asyncio.create_task(self.auto_delete_after_24h())
 
