@@ -161,13 +161,12 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         
         evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
         if executor_trust >= member_value:
-            # await member.ban(delete_message_days=1, reason=reason)
+            await member.ban(delete_message_days=1, reason=reason)
             await interaction.response.send_message(f"{member.mention} has been banned", ephemeral=True)
             await helper_utils.log_punishment(guild, "bans", executor, punished_member, "ban", reason, evidence_embed)
         else:
             approval_channel_id = database.get_log_channel(guild, "ban-requests")
             approval_channel = guild.get_channel(approval_channel_id)
-            # MAKE IT SEND EVIDENCE AND INCLUDE APPROVALS IN REMOVED TRUST
             evidence_link = await helper_utils.log_evidence(guild, evidence_embed)
             view = ApprovalView(client, executor, punished_member, reason, evidence_link, helper_utils)
             view.request_message = await approval_channel.send(
