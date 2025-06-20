@@ -2,6 +2,7 @@ import discord
 from database import Database
 from helper_utils import HelperUtils
 from collections import defaultdict
+import asyncio
 
 class ApprovalView(discord.ui.View):
     def __init__(self, client, executor: discord.Member, member: discord.Member, reason: str, evidence: str, helper_utils: HelperUtils):
@@ -19,6 +20,17 @@ class ApprovalView(discord.ui.View):
         self.approvers = set([executor.id])
         self.deniers = set([executor.id])
         self.trust = executor_trust
+
+        self._auto_delete_task = asyncio.create_task(self.auto_delete_after_24h())
+
+    async def auto_delete_after_24h(self):
+        twenty_four_hours = 24 * 60 * 60
+        await asyncio.sleep(twenty_four_hours)
+        if self.request_message:
+            try:
+                await self.request_message.delete()
+            except Exception:
+                pass
     
     def register_ban_approval(self, member: discord.Member):
         self.trust += self.helper_utils.get_weighted_member_trust(member)
