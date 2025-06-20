@@ -60,9 +60,9 @@ class StaffVoteView(discord.ui.View):
         approver = interaction.guild.get_member(interaction.user.id)
         self.register_approval(approver)
         await self.update_request_message()
-        if self.combined_trust <= self.required_trust:
+        if self.combined_trust >= self.required_trust:
             await self.request_message.delete()
-            await self.on_vote_denial_end(interaction)
+            await self.on_vote_approval_end(interaction)
         else:
             await self.on_approve(interaction)
         

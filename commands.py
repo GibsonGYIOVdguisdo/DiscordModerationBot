@@ -4,6 +4,7 @@ from database import Database
 from helper_utils import HelperUtils
 from datetime import datetime, timedelta, timezone
 from ban_request_view import BanRequestView
+from unban_request_view import UnbanRequestView
 
 def setup_commands(tree: app_commands.CommandTree, database: Database, helper_utils: HelperUtils, client: discord.Client):
     @tree.command(name="reset_guild_settings")
@@ -47,6 +48,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             app_commands.Choice(name="Evidence", value="evidence"),
             app_commands.Choice(name="Bans", value="bans"),
             app_commands.Choice(name="Ban Requests", value="ban-requests"),
+            app_commands.Choice(name="Unban Requests", value="unban-requests"),
         ]
     )
     async def set_log_channel(interaction: discord.Interaction, log_type: app_commands.Choice[str], channel: discord.TextChannel):
@@ -136,6 +138,44 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             await interaction.response.send_message(f"❌ go away you cant do that", ephemeral=True)
 
     @tree.command(
+        name="betterunban",
+        description="Ban a user from the server",
+    )
+    async def betterunban(interaction: discord.Interaction, member_id: str, reason: str):
+        guild = interaction.guild
+        executor = interaction.guild.get_member(interaction.user.id)
+        executor_trust = helper_utils.get_weighted_member_trust(executor)
+        ban_entry = None 
+
+        try:
+            ban_entry = await interaction.guild.fetch_ban(discord.Object(id=int(member_id)))
+        except discord.NotFound:
+            await interaction.response.send_message("User not found or not banned.", ephemeral=True)
+            return
+            
+        if not helper_utils.is_staff_member(executor):
+            await interaction.response.send_message("You do not have permission", ephemeral=True)
+            return
+        
+        minimum_trust_for_unban = 5
+        if executor_trust >= minimum_trust_for_unban:
+            await interaction.guild.unban(ban_entry.user, reason=f"Unbanned by {executor}. Reason: {reason}")
+            await interaction.response.send_message(f"{ban_entry.user} has been unbanned", ephemeral=True)
+            await helper_utils.log_punishment(interaction.guild, "bans", executor, ban_entry.user, "unban", reason)
+        else:
+            approval_channel_id = database.get_log_channel(guild, "unban-requests")
+            approval_channel = guild.get_channel(approval_channel_id)
+            ban_entry
+            view = UnbanRequestView(executor, )
+            view.request_message = await approval_channel.send(
+                "-",
+                view=view
+            )
+            await view.update_request_message()
+
+            await interaction.response.send_message("Unban request submitted for approval.", ephemeral=True)
+
+    @tree.command(
         name="betterban",
         description="Ban a user from the server",
     )
@@ -147,15 +187,14 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         executor = interaction.guild.get_member(interaction.user.id)
         punished_member = member
         executor_trust = helper_utils.get_weighted_member_trust(executor)
-        member_trust = helper_utils.get_member_trust(punished_member)
         member_value = helper_utils.get_member_value(punished_member)
         evidence_type = evidence.value
 
-        if executor_trust < 0:
+        if not helper_utils.is_staff_member(executor):
             await interaction.response.send_message("You do not have permission", ephemeral=True)
             return
         
-        if member_trust >= 0:
+        if helper_utils.is_staff_member(punished_member):
             await interaction.response.send_message("You can not ban staff members", ephemeral=True)
             return
         
