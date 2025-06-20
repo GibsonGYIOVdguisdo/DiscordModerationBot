@@ -11,7 +11,7 @@ class StaffVoteView(discord.ui.View):
         self.vote_owner = vote_owner
         self.request_message = request_message
         self.helper_utils = helper_utils
-        self.approvers = set([vote_owner])
+        self.approvers = set([vote_owner.id])
         self.deniers = set()
         self.combined_trust = helper_utils.get_weighted_member_trust(vote_owner)
         self.required_trust = required_trust
@@ -35,8 +35,8 @@ class StaffVoteView(discord.ui.View):
         self.deniers.add(member)
 
     def has_member_voted(self, member: discord.Member):
-        has_member_approved = member in self.approvers
-        has_member_denied = member in self.deniers
+        has_member_approved = member.id in self.approvers
+        has_member_denied = member.id in self.deniers
         has_member_voted = has_member_approved or has_member_denied
         return has_member_voted
     
