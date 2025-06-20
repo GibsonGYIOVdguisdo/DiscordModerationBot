@@ -139,7 +139,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
 
     @tree.command(
         name="betterunban",
-        description="Ban a user from the server",
+        description="Unbans a user from the server",
     )
     async def betterunban(interaction: discord.Interaction, member_id: str, reason: str):
         guild = interaction.guild
@@ -165,8 +165,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         else:
             approval_channel_id = database.get_log_channel(guild, "unban-requests")
             approval_channel = guild.get_channel(approval_channel_id)
-            ban_entry
-            view = UnbanRequestView(executor, )
+            view = UnbanRequestView(executor, ban_entry, reason, helper_utils)
             view.request_message = await approval_channel.send(
                 "-",
                 view=view
