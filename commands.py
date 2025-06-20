@@ -168,11 +168,13 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             approval_channel_id = database.get_log_channel(guild, "ban-requests")
             approval_channel = guild.get_channel(approval_channel_id)
             evidence_link = await helper_utils.log_evidence(guild, evidence_embed)
-            view = BanRequestView(client, executor, punished_member, reason, evidence_link, helper_utils)
+            view = BanRequestView(executor, punished_member, reason, evidence_link, helper_utils)
             view.request_message = await approval_channel.send(
-                f"{executor.mention} requested a ban on {member.mention}. Trust required: {member_value}. Current trust: {executor_trust}. Evidence: {evidence_link}. Reason: '{reason}'. Approve below.",
+                "-",
                 view=view
             )
+            await view.update_request_message()
+
             await interaction.response.send_message("Ban request submitted for approval.", ephemeral=True)
 
 
