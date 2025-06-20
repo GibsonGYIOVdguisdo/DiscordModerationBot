@@ -14,7 +14,7 @@ class BanRequestView(StaffVoteView):
         self.punished_member = punished_member
         self.reason = reason
         punished_member_value = helper_utils.get_member_value(punished_member)
-        
+
         super().__init__(helper_utils, twenty_four_hours, punished_member_value, executor, request_message)
 
     async def update_request_message(self):
@@ -37,7 +37,7 @@ class BanRequestView(StaffVoteView):
 
     async def on_vote_approval_end(self, interaction: discord.Interaction):
         await self.punished_member.ban(delete_message_days=1)
-        await self.helper_utils.log_punishment(interaction.guild, "bans", self.vote_owner, self.punished_member, "ban", self.reason, evidence_link=self.evidence)
+        await self.helper_utils.log_punishment(interaction.guild, "bans", self.vote_owner, self.punished_member, "ban", self.reason, evidence_link=self.evidence, approvers=list(self.approvers))
         await interaction.response.send_message(
             f"{self.punished_member} has been banned",
             ephemeral=True
