@@ -42,6 +42,11 @@ class HelperUtils:
             member_trust = max(member_trust, role_trust)
         return member_trust
     
+    def is_staff_member(self, member: discord.Member) -> bool:
+        staff_trust_threshold = 0
+        is_staff_member = self.get_member_trust(member) >= staff_trust_threshold
+        return is_staff_member
+    
     def get_member_value(self, member: discord.Member) -> int:
         guild = member.guild
         member_value = 0
