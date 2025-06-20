@@ -73,7 +73,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         executor = interaction.guild.get_member(interaction.user.id)
         executor_trust = helper_utils.get_member_trust(executor)
         punished_member_trust = helper_utils.get_member_trust(punished_member)
-        if executor_trust >= 0 and executor_trust > punished_member_trust:
+        if helper_utils.is_staff_member(executor) and executor_trust > punished_member_trust:
             try:
                 await punished_member.send(f"You have been warned in {interaction.guild.name} for '{reason}'")
             except Exception as e:
@@ -109,7 +109,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         executor_trust = helper_utils.get_member_trust(executor)
         member_trust = helper_utils.get_member_trust(punished_member)
 
-        if executor_trust >= 0 and executor_trust > member_trust:
+        if helper_utils.is_staff_member(executor) and executor_trust > member_trust:
             duration_mapping = {
                 "5m": 5,
                 "6h": 360,
@@ -228,7 +228,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         guild = interaction.guild
         executor = interaction.guild.get_member(interaction.user.id)
         executor_trust = helper_utils.get_member_trust(executor)
-        if executor_trust < 0:
+        if not helper_utils.is_staff_member(executor):
             await interaction.response.send_message("You do not have permission", ephemeral=True)
             return
         if not member and member_id == "-1":
