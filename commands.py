@@ -3,7 +3,7 @@ from discord import app_commands
 from database import Database
 from helper_utils import HelperUtils
 from datetime import datetime, timedelta, timezone
-from approval_view import ApprovalView
+from ban_request_view import BanRequestView
 
 def setup_commands(tree: app_commands.CommandTree, database: Database, helper_utils: HelperUtils, client: discord.Client):
     @tree.command(name="reset_guild_settings")
@@ -168,7 +168,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             approval_channel_id = database.get_log_channel(guild, "ban-requests")
             approval_channel = guild.get_channel(approval_channel_id)
             evidence_link = await helper_utils.log_evidence(guild, evidence_embed)
-            view = ApprovalView(client, executor, punished_member, reason, evidence_link, helper_utils)
+            view = BanRequestView(client, executor, punished_member, reason, evidence_link, helper_utils)
             view.request_message = await approval_channel.send(
                 f"{executor.mention} requested a ban on {member.mention}. Trust required: {member_value}. Current trust: {executor_trust}. Evidence: {evidence_link}. Reason: '{reason}'. Approve below.",
                 view=view

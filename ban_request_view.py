@@ -4,7 +4,7 @@ from helper_utils import HelperUtils
 from collections import defaultdict
 import asyncio
 
-class ApprovalView(discord.ui.View):
+class BanRequestView(discord.ui.View):
     def __init__(self, client, executor: discord.Member, member: discord.Member, reason: str, evidence: str, helper_utils: HelperUtils):
         super().__init__(timeout=None)
         self.helper_utils = helper_utils
