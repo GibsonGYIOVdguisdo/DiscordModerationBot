@@ -21,7 +21,7 @@ intents.members = True
 
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
-
+tree.clear_commands(guild=None)
 database = Database(MONGO_URI)
 helper_utils = HelperUtils(client, database)
 

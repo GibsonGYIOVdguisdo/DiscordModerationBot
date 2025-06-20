@@ -8,7 +8,6 @@ def setup_events(client: discord.Client, tree: app_commands.CommandTree, databas
     async def on_ready():
         print(f"Logged in as {client.user}")
         try:
-            tree.clear_commands(guild=None)  # For global commands
             synced = await tree.sync()
             print(f"Synced {len(synced)} command(s)")
         except Exception as e:
