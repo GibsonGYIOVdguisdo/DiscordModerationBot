@@ -16,6 +16,11 @@ class HelperUtils:
         self.client = client
         self.database = database
 
+    def count_recent_approvals(self, member: discord.Member) -> int:
+        guild = member.guild
+        approved_punishments = self.database.get_recently_given_approvals(guild, member)
+        return len(approved_punishments)
+
     def count_recently_given_bans(self, member: discord.Member) -> int:
         guild = member.guild
         punishments = self.database.get_recently_given_bans(guild, member)
@@ -23,9 +28,11 @@ class HelperUtils:
 
     def get_weighted_member_trust(self, member: discord.Member) -> int:
         member_trust = self.get_member_trust(member)
-        reduction = self.count_recently_given_bans(member)
-        member_trust = max(member_trust - reduction, 0)
-        return member_trust
+        recent_ban_count = self.count_recently_given_bans(member)
+        recent_approval_count = self.count_recent_approvals(member)
+        trust_reduction = recent_ban_count + recent_approval_count
+        weighted_trust = max(member_trust - trust_reduction, 0)
+        return weighted_trust
 
     def get_member_trust(self, member: discord.Member) -> int:
         guild = member.guild
@@ -76,10 +83,12 @@ class HelperUtils:
         return evidence_message
 
 
-    async def log_punishment(self, guild: discord.Guild, log_type: str, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence_embed:discord.Embed=None, evidence_link:str=""):
+    async def log_punishment(self, guild: discord.Guild, log_type: str, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence_embed:discord.Embed=None, evidence_link:str="", approvers:list[id]=[]):
         log_channel_id = self.database.get_log_channel(guild, log_type)
         
         log_channel = guild.get_channel(log_channel_id) 
+
+        evidence_message = "No evidence provided"
         if evidence_link:
             evidence_message=evidence_link
         elif evidence_embed:
@@ -92,7 +101,7 @@ class HelperUtils:
         embed.add_field(name="Punishment", value=punishment, inline=False)
         embed.add_field(name="Reason", value=reason, inline=False)
         embed.add_field(name="Evidence", value=evidence_message, inline=False)
-        self.database.add_member_punishment(guild, executing_member, punished_member, punishment, reason, evidence_message)
+        self.database.add_member_punishment(guild, executing_member, punished_member, punishment, reason, evidence_message, approvers)
         
         await log_channel.send(embed=embed)
 

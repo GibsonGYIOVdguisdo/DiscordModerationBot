@@ -58,7 +58,7 @@ class Database:
         log_channel = server_document["logChannels"].get(log_type, -1)
         return log_channel
         
-    def add_member_punishment(self, guild: discord.Guild, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence: str):
+    def add_member_punishment(self, guild: discord.Guild, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence: str, approvers: list[str]=[]):
         punishment_document = {
             "guildId": guild.id,
             "memberId": punished_member.id,
@@ -66,6 +66,7 @@ class Database:
             "punishment": punishment,
             "reason": reason,
             "evidence": evidence,
+            "approvers": approvers,
             "date": datetime.now()
         }
         self.punishments.insert_one(punishment_document)
@@ -88,5 +89,15 @@ class Database:
             "punisherId": member.id,
             "punishment": "ban",
             "date": {"$gte": one_hour_ago}
+        }))
+        return recent_punishments
+    
+    def get_recently_given_approvals(self, guild: discord.Guild, member: discord.Member=None):
+        one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
+        recent_punishments = list(self.punishments.find({
+            "guildId": guild.id,
+            "punishment": "ban",
+            "date": {"$gte": one_hour_ago},
+            "approvers": {"$in": [member.id]}
         }))
         return recent_punishments

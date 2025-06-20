@@ -52,7 +52,7 @@ class ApprovalView(discord.ui.View):
         if approval_data["trust"] >= self.member_value:
             await self.member.ban(reason=self.reason)
             await interaction.response.send_message(f"{self.member.mention} has been banned.", ephemeral=True)
-            await self.helper_utils.log_punishment(guild, "bans", self.executor, punished_member, "ban", self.reason, evidence_link=self.evidence)
+            await self.helper_utils.log_punishment(guild, "bans", self.executor, punished_member, "ban", self.reason, evidence_link=self.evidence, approvers=list(approval_data["approvers"]))
             del self.approval_data
             await self.request_message.delete()
         else:
