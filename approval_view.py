@@ -17,11 +17,22 @@ class ApprovalView(discord.ui.View):
 
         executor_trust = helper_utils.get_weighted_member_trust(executor)
         self.approvers = set([executor.id])
+        self.deniers = set([executor.id])
         self.trust = executor_trust
     
-    def register_ban_approval(self, approver: discord.Member):
-        self.trust += self.helper_utils.get_weighted_member_trust(approver)
-        self.approvers.add(approver.id)
+    def register_ban_approval(self, member: discord.Member):
+        self.trust += self.helper_utils.get_weighted_member_trust(member)
+        self.approvers.add(member.id)
+
+    def register_ban_denial(self, member: discord.Member):
+        self.trust -= self.helper_utils.get_weighted_member_trust(member)
+        self.deniers.add(member.id)
+
+    def has_member_voted(self, member: discord.Member):
+        has_member_approved = member.id in self.approvers
+        has_member_denied = member.id in self.deniers
+        has_member_voted = has_member_approved or has_member_denied
+        return has_member_voted
 
     @discord.ui.button(label="Approve Ban", style=discord.ButtonStyle.green)
     async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -43,8 +54,8 @@ class ApprovalView(discord.ui.View):
             await interaction.response.send_message("You do not have permission to approve bans.", ephemeral=True)
             return
         
-        if approver.id in self.approvals:
-            await interaction.response.send_message("You have already approved this ban.", ephemeral=True)
+        if approver.id in self.has_member_voted(approver):
+            await interaction.response.send_message("You have already voted on this ban.", ephemeral=True)
             return
         
         self.register_ban_approval(approver)
@@ -63,3 +74,40 @@ class ApprovalView(discord.ui.View):
                 f"Approval recorded. Current trust: {self.trust} / {self.member_value}. More approvals needed.",
                 ephemeral=True
             )
+    
+    @discord.ui.button(label="Deny Ban", style=discord.ButtonStyle.red)
+    async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
+        denying_member = interaction.guild.get_member(interaction.user.id)
+        
+        if not denying_member:
+            await interaction.response.send_message("Could not retrieve your member data.", ephemeral=True)
+            return
+        
+        denying_member_trust = self.helper_utils.get_weighted_member_trust(denying_member)
+
+        if denying_member_trust < 0:
+            await interaction.response.send_message("You do not have permission to approve bans.", ephemeral=True)
+            return
+        
+        if denying_member.id == self.executor.id:
+            await interaction.response.send_message(f"Ban request for {self.member.mention} has been cancelled.", ephemeral=True)
+            await self.request_message.delete() 
+            return
+        
+        if self.has_member_voted(denying_member):
+            await interaction.response.send_message("You have already voted on this ban.", ephemeral=True)
+            return
+        
+        
+        if self.trust < 0:
+            await self.request_message.delete() 
+            await interaction.response.send_message(f"Ban request for {self.member.mention} has been cancelled due to low trust.", ephemeral=True)
+            return
+        
+        self.register_ban_denial()
+        
+        await self.request_message.edit(
+            content=f"{self.executor.mention} requested a ban on {self.member.mention}. Trust required: {self.member_value}. Current trust: {self.trust} / {self.member_value}. Reason: '{self.reason}'. Approve below."
+        )
+        
+        await interaction.response.send_message(f"Ban request for {self.member.mention} has been denied.", ephemeral=True)
