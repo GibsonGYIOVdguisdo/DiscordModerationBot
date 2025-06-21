@@ -143,7 +143,7 @@ class HelperUtils:
             embed.add_field(name="Status", value=member.nick, inline=False)
         return embed
     
-    async def is_member_bot(self, member: discord.Member) -> bool:
+    def is_member_bot(self, member: discord.Member) -> bool:
         if member.name.startswith("hellen") and member.name[6:].isdigit():
             return True
         elif member.name.startswith("butt") and member.name[4:].isdigit():
@@ -152,8 +152,39 @@ class HelperUtils:
             return True
         return False
     
-    async def is_message_from_bot(self, message: discord.Message) -> bool:
-        member_value = self.get_member_value(message.member)
+    def is_message_from_bot(self, message: discord.Message) -> bool:
+        member = message.author
+        member_value = self.get_member_value(member)
         if message.content == "DMs open for guy" and member_value <= 0:
             return True
         return False
+
+    def is_message_public_mod_talk(self, message: discord.Message) -> bool:
+        channel = message.channel
+        member = message.author
+        guild = member.guild
+
+        keywords = [
+            "ban",
+            "mute",
+            "warn",
+            "punish"
+        ]
+
+        if not self.is_staff_member(member):
+            return False
+        
+        if self.database.has_mod_warning(guild, member):
+            return False
+
+        everyone_role = message.guild.default_role
+        if channel.permissions_for(everyone_role).read_messages:
+            for keyword in keywords:
+                if keyword in message.content:
+                    return True
+        return False
+
+    async def give_mod_talk_warning(self, member: discord.Member):
+        self.database.add_mod_warning(member.guild, member)
+        warning_text = "It looks like you may have been talking about punishments publically. Please refrain from doing this as it often leads to more problems."
+        await member.send(warning_text)

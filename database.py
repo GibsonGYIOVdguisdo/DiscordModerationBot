@@ -101,3 +101,22 @@ class Database:
             "approvers": {"$in": [member.id]}
         }))
         return recent_punishments
+    
+    def add_mod_warning(self, guild: discord.Guild, member: discord.Member):
+        warning_document = {
+            "guildId": guild.id,
+            "memberId": member.id,
+            "type": "mod_warn",
+            "date": datetime.now(timezone.utc),
+            "expireAt": datetime.now(timezone.utc) + timedelta(days=3)
+        }
+        self.punishments.insert_one(warning_document)
+    
+    def has_mod_warning(self, guild: discord.Guild, member: discord.Member):
+        filter = {
+            "guildId": guild.id,
+            "memberId": member.id,
+            "type": "mod_warn"
+        }
+        recent_warnings = list(self.punishments.find(filter))
+        return len(recent_warnings) != 0
