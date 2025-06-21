@@ -144,7 +144,6 @@ class HelperUtils:
         return embed
     
     async def is_member_bot(self, member: discord.Member):
-        client = self.client
         if member.name.startswith("hellen") and member.name[6:].isdigit():
             return True
         elif member.name.startswith("butt") and member.name[4:].isdigit():
