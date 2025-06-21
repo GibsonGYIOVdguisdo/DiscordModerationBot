@@ -142,3 +142,13 @@ class HelperUtils:
             embed.add_field(name="Nickname", value=member.nick, inline=False)
             embed.add_field(name="Status", value=member.nick, inline=False)
         return embed
+    
+    async def is_member_bot(self, member: discord.Member):
+        client = self.client
+        if member.name.startswith("hellen") and member.name[6:].isdigit():
+            return True
+        elif member.name.startswith("butt") and member.name[4:].isdigit():
+            return True
+        elif member.name.startswith("hellenbutt") and member.name[10:].isdigit():
+            return True
+        return False
