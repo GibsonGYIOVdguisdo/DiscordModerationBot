@@ -129,7 +129,7 @@ class HelperUtils:
         elif type == "ticket":
             embed.add_field(name="Ticket Channel", value=channel.jump_url, inline=False)
             if "ticket" in channel.name:
-                async for message in channel.history(limit=max_fields, oldest_first=True):
+                async for message in channel.history(limit=max_fields-1, oldest_first=True):
                     embed.add_field(name=str(message.author), value=message.content, inline=False)
                     for attachment in message.attachments:
                         attachments.append(await attachment.to_file())
