@@ -107,20 +107,20 @@ class HelperUtils:
         
         await log_channel.send(embed=embed)
 
-    async def get_last_10_messages(self, channel: discord.TextChannel, member: discord.Member):
+    async def get_last_n_messages(self, channel: discord.TextChannel, member: discord.Member, count: int):
         all_messages = []
         async for message in channel.history(limit=100):
             if message.author == member:
                 all_messages.append(message)
         all_messages = sorted(all_messages, key=lambda x: x.created_at)
-        return all_messages[:10]
+        return all_messages[-count:]
     
     async def get_evidence_embed(self, member: discord.Member, type: str, channel: discord.TextChannel=None):
         embed = discord.Embed(title=f"{member} evidence", color=discord.Color.blue())
         attachments = []
         max_fields = 25
         if type == "messages":
-            messages = await self.get_last_10_messages(channel, member)
+            messages = await self.get_last_n_messages(channel, member, max_fields)
             for message in messages[::-1]:
                 embed.add_field(name=message.jump_url, value=message.content, inline=False)
                 for attachment in message.attachments:
