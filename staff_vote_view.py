@@ -31,7 +31,7 @@ class StaffVoteView(discord.ui.View):
         self.approvers.add(member.id)
 
     def register_denial(self, member: discord.Member):
-        self.combined_trust -= self.helper_utils.get_weighted_member_trust(member.id)
+        self.combined_trust -= self.helper_utils.get_weighted_member_trust(member)
         self.deniers.add(member.id)
 
     def has_member_voted(self, member: discord.Member):
