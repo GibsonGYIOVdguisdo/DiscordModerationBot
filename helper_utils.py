@@ -87,20 +87,17 @@ class HelperUtils:
             evidence_message = (await evidence_channel.send(embed=evidence_embed)).jump_url
         return evidence_message
 
-
     async def log_punishment(self, guild: discord.Guild, log_type: str, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence_embed:discord.Embed=None, evidence_link:str="", approvers:list[id]=[]):
         log_channel_id = self.database.get_log_channel(guild, log_type)
-        
         log_channel = guild.get_channel(log_channel_id) 
 
         evidence_message = "No evidence provided"
         if evidence_link:
-            evidence_message=evidence_link
+            evidence_message = evidence_link
         elif evidence_embed:
             evidence_message = await self.log_evidence(guild, evidence_embed)
 
         embed = discord.Embed(title=punishment)
-
         embed.add_field(name="Member", value=HelperUtils.format_member_string(punished_member), inline=False)
         embed.add_field(name="Punisher", value=HelperUtils.format_member_string(executing_member), inline=False)
         embed.add_field(name="Punishment", value=punishment, inline=False)
@@ -110,7 +107,7 @@ class HelperUtils:
         
         await log_channel.send(embed=embed)
 
-    async def get_last_10_messages(self, channel: discord.Guild, member: discord.Member):
+    async def get_last_10_messages(self, channel: discord.TextChannel, member: discord.Member):
         all_messages = []
         async for message in channel.history(limit=100):
             if message.author == member:
@@ -121,6 +118,7 @@ class HelperUtils:
     async def get_evidence_embed(self, member: discord.Member, type: str, channel: discord.TextChannel=None):
         embed = discord.Embed(title=f"{member} evidence", color=discord.Color.blue())
         attachments = []
+        max_fields = 25
         if type == "messages":
             messages = await self.get_last_10_messages(channel, member)
             for message in messages[::-1]:
@@ -131,8 +129,8 @@ class HelperUtils:
         elif type == "ticket":
             embed.add_field(name="Ticket Channel", value=channel.jump_url, inline=False)
             if "ticket" in channel.name:
-                async for message in channel.history(limit=30, oldest_first = True):
-                    embed.add_field(name=message.author, value=message.content, inline=False)
+                async for message in channel.history(limit=max_fields, oldest_first=True):
+                    embed.add_field(name=str(message.author), value=message.content, inline=False)
                     for attachment in message.attachments:
                         attachments.append(await attachment.to_file())
         elif type == "trust-me-bro":
