@@ -30,7 +30,7 @@ def setup_events(client: discord.Client, tree: app_commands.CommandTree, databas
 
     @client.event
     async def on_message(message: discord.Message):
-        member = message.member
+        member = message.author
         if helper_util.is_message_from_bot(message):
             await member.ban(reason="Sextortion bot")
             evidence_embed = helper_util.get_evidence_embed(member, "profile")
