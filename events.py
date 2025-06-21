@@ -25,7 +25,7 @@ def setup_events(client: discord.Client, tree: app_commands.CommandTree, databas
             print(f"Failed to fetch {member.name}")
         if helper_util.is_member_bot(member):
             await member.ban(reason="Sextortion bot")
-            evidence_embed = helper_util.get_evidence_embed(member, "profile")
+            evidence_embed = await helper_util.get_evidence_embed(member, "profile")
             await helper_util.log_punishment(member, client.user, "bans", member, "ban", "Sextortion Bot", evidence_embed)
 
     @client.event
@@ -36,7 +36,7 @@ def setup_events(client: discord.Client, tree: app_commands.CommandTree, databas
         member = message.author
         if helper_util.is_message_from_bot(message):
             await member.ban(reason="Sextortion bot")
-            evidence_embed = helper_util.get_evidence_embed(member, "profile")
+            evidence_embed = await helper_util.get_evidence_embed(member, "profile")
             await helper_util.log_punishment(member, client.user, "bans", member, "ban", "Sextortion Bot", evidence_embed)
 
         if helper_util.is_message_public_mod_talk(message):
