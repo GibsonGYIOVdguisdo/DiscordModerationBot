@@ -78,7 +78,11 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
                 await punished_member.send(f"You have been warned in {interaction.guild.name} for '{reason}'")
             except Exception as e:
                 print(e)
-            await interaction.response.send_message(f"Successfully warned {punished_member.mention} for '{reason}'", ephemeral=True)
+            try:
+                await interaction.response.send_message(f"Successfully warned {punished_member.mention} for '{reason}'", ephemeral=True)
+            except Exception as e:
+                print(e)
+            
             evidence_type = evidence.value
             evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
             await helper_utils.log_punishment(guild, "warns", executor, punished_member, "warning", reason, evidence_embed)
@@ -127,10 +131,12 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             now += timedelta(minutes=mute_minutes)
             await member.timeout(now.astimezone())
             
-
-            await interaction.response.send_message(
-                f"Successfully muted {member.mention} for {duration.name} due to '{reason}'.", ephemeral=True
-            )
+            try:
+                await interaction.response.send_message(
+                    f"Successfully muted {member.mention} for {duration.name} due to '{reason}'.", ephemeral=True
+                )
+            except Exception as e:
+                print(e)
             
             evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
             await helper_utils.log_punishment(guild, "mutes", executor, punished_member, duration.name, reason, evidence_embed)
@@ -160,7 +166,10 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         minimum_trust_for_unban = 5
         if executor_trust >= minimum_trust_for_unban:
             await interaction.guild.unban(ban_entry.user, reason=f"Unbanned by {executor}. Reason: {reason}")
-            await interaction.response.send_message(f"{ban_entry.user} has been unbanned", ephemeral=True)
+            try:
+                await interaction.response.send_message(f"{ban_entry.user} has been unbanned", ephemeral=True)
+            except Exception as e:
+                print(e)
             await helper_utils.log_punishment(interaction.guild, "bans", executor, ban_entry.user, "unban", reason)
         else:
             approval_channel_id = database.get_log_channel(guild, "unban-requests")
@@ -200,7 +209,10 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
         evidence_embed = await helper_utils.get_evidence_embed(punished_member, evidence_type, interaction.channel)
         if executor_trust >= member_value:
             await member.ban(delete_message_days=1, reason=reason)
-            await interaction.response.send_message(f"{member.mention} has been banned", ephemeral=True)
+            try:
+                await interaction.response.send_message(f"{member.mention} has been banned", ephemeral=True)
+            except Exception as e:
+                print(e)
             await helper_utils.log_punishment(guild, "bans", executor, punished_member, "ban", reason, evidence_embed)
         else:
             approval_channel_id = database.get_log_channel(guild, "ban-requests")
