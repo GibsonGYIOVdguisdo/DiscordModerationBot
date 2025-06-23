@@ -1,3 +1,4 @@
 discord.py
 pymongo
 python-dotenv
+cachetools
