@@ -2,6 +2,7 @@ from pymongo import MongoClient
 import discord
 from datetime import datetime, timedelta, timezone
 from cachetools import cached, TTLCache
+from cachetools.keys import hashkey
 
 class Database:
     value_cache = TTLCache(maxsize=100, ttl=3600)
@@ -39,6 +40,9 @@ class Database:
         server_document["roleValues"] = server_document.get("roleValues", {})
         server_document["roleValues"][str(role.id)] = trust
         self.servers.find_one_and_replace(filter, server_document)
+        
+        key = hashkey(self, guild, role)
+        self.get_role_value.cache.pop(key, None)
 
     @cached(value_cache)
     def get_role_value(self, guild: discord.Guild, role: discord.Role) -> int:
