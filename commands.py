@@ -49,6 +49,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             app_commands.Choice(name="Bans", value="bans"),
             app_commands.Choice(name="Ban Requests", value="ban-requests"),
             app_commands.Choice(name="Unban Requests", value="unban-requests"),
+            app_commands.Choice(name="Notes", value="notes"),
         ]
     )
     async def set_log_channel(interaction: discord.Interaction, log_type: app_commands.Choice[str], channel: discord.TextChannel):
@@ -227,8 +228,6 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
 
             await interaction.response.send_message("Ban request submitted for approval.", ephemeral=True)
 
-
-
     @tree.command(
         name="punishments",
     )
@@ -248,3 +247,27 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
             return
         embed = helper_utils.get_punishment_embed(guild, member, int(member_id))
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @tree.command(
+        name="betternote",
+        description="Adds a note to a member without messaging them that is viewable by other staff members"
+    )
+    async def betternote(interaction: discord.Interaction, member: discord.Member, text: str):
+        guild = interaction.guild
+        executor = interaction.guild.get_member(interaction.user.id)
+        punished_member = member
+
+        executor_trust = helper_utils.get_member_trust(executor)
+        member_trust = helper_utils.get_member_trust(punished_member)
+
+        if helper_utils.is_staff_member(executor) and executor_trust > member_trust:
+            await helper_utils.log_punishment(guild, "notes", executor, punished_member, "note", text, "")
+            
+            try:
+                await interaction.response.send_message(
+                    f"Successfully added note '{text}' to '{member.mention}'.", ephemeral=True
+                )
+            except Exception as e:
+                print(e)
+        else:
+            await interaction.response.send_message(f"❌ go away you cant do that", ephemeral=True)
