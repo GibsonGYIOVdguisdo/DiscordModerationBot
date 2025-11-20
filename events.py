@@ -41,5 +41,5 @@ def setup_events(client: discord.Client, tree: app_commands.CommandTree, databas
             await helper_util.log_punishment(member.guild, client.user, "bans", member, "ban", "Sextortion Bot", evidence_embed)
 
         if helper_util.is_message_public_mod_talk(message):
-            await helper_util.give_mod_talk_warning(member)
+            await helper_util.give_mod_talk_warning(member, message.jump_url)
             

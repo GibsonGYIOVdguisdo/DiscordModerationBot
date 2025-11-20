@@ -174,7 +174,7 @@ class HelperUtils:
         if not self.is_staff_member(member):
             return False
         
-        if self.database.has_mod_warning(guild, member):
+        if self.database.has_recent_mod_warn(guild, member):
             return False
 
         everyone_role = message.guild.default_role
@@ -184,7 +184,11 @@ class HelperUtils:
                     return True
         return False
 
-    async def give_mod_talk_warning(self, member: discord.Member):
-        self.database.add_mod_warning(member.guild, member)
-        warning_text = "It looks like you may have been talking about punishments publically. Please refrain from doing this as it often leads to more problems."
+    async def give_mod_talk_warning(self, member: discord.Member, evidence: str):
+        guild = member.guild
+        punisher = member.guild.get_member(self.client.user.id)
+
+        self.database.add_member_punishment(guild, punisher, member, "mod warn", "Punishment related messages", evidence)
+
+        warning_text = "It looks like you might have been talking about punishments publicly. Please avoid talking about punishments (even if done by you) outside of staff chat and tickets to prevent problems."
         await member.send(warning_text)
