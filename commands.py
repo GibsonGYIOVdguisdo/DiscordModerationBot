@@ -250,7 +250,7 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
 
     @tree.command(
         name="betternote",
-        description="Adds a note to a member without messaging them that is viewable by other staff members"
+        description="Adds a note to a member without messaging them"
     )
     async def betternote(interaction: discord.Interaction, member: discord.Member, text: str):
         guild = interaction.guild
