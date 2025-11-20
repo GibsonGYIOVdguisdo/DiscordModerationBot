@@ -65,13 +65,13 @@ class HelperUtils:
         embed = discord.Embed(title=f"{member or member_id} punishments")
         punishment_list = self.database.get_member_punishments(guild, member, member_id)[-10:]
         for punishment in punishment_list:
-            punishment_type = f"**{punishment['punishment']}**"
-            reason = punishment["reason"]
+            punishment_type = f"**{punishment.get('punishment', 'unknown')}**"
+            reason = punishment.get("reason","")
             try:
-                punisher = guild.get_member(punishment["punisherId"])
+                punisher = guild.get_member(punishment.get("punisherId", 0))
             except:
                 punisher = "Left server"
-            date = punishment["date"]
+            date = punishment.get("date")
             evidence = punishment.get("evidence", "No evidence provided")
             punishment_text = f"**Reason**: {reason}\n**Punisher**: {punisher}\n**Date**: {date}\n**Evidence**: {evidence}"
             embed.add_field(name=punishment_type.upper(), value=punishment_text, inline=False)
