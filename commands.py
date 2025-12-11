@@ -69,6 +69,22 @@ def setup_commands(tree: app_commands.CommandTree, database: Database, helper_ut
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+    @tree.command(name="get_member_info")
+    async def get_member_info(interaction: discord.Interaction, member: discord.Member):
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "You do not have permission to use this command.", ephemeral=True
+            )
+            return
+        
+        embed = discord.Embed(title=f"{helper_utils.format_member_string(member)}")
+
+        embed.add_field(name="Unweighted Trust", value=helper_utils.get_member_trust(member))
+        embed.add_field(name="Weighted Trust", value=helper_utils.get_weighted_member_trust(member))
+        embed.add_field(name="Value", value=helper_utils.get_member_value(member))
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
     @tree.command(
         name="set_log_channel",
     )
