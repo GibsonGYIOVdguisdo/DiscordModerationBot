@@ -3,7 +3,13 @@ from discord import app_commands
 from database.database import Database
 from helper_utils import HelperUtils
 
-def setup(tree: app_commands.CommandTree, database: Database, helper_utils: HelperUtils, client: discord.Client):
+
+def setup(
+    tree: app_commands.CommandTree,
+    database: Database,
+    helper_utils: HelperUtils,
+    client: discord.Client,
+):
     @tree.command(name="reset_guild_settings")
     async def reset_guild_settings(interaction: discord.Interaction):
         if not interaction.user.guild_permissions.administrator:
@@ -12,29 +18,39 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
             )
             return
         database.server.create_server_document(interaction.guild)
-        await interaction.response.send_message(f"All guild settings have been reset", ephemeral=True)
-    
+        await interaction.response.send_message(
+            f"All guild settings have been reset", ephemeral=True
+        )
+
     @tree.command(name="set_role_trust")
-    async def set_role_trust(interaction: discord.Interaction, role: discord.Role, trust: int):
+    async def set_role_trust(
+        interaction: discord.Interaction, role: discord.Role, trust: int
+    ):
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message(
                 "You do not have permission to use this command.", ephemeral=True
             )
             return
-        
+
         database.server.set_role_trust(interaction.guild, role, trust)
-        await interaction.response.send_message(f"Trust of '{role}' set to '{trust}'", ephemeral=True)
+        await interaction.response.send_message(
+            f"Trust of '{role}' set to '{trust}'", ephemeral=True
+        )
 
     @tree.command(name="set_role_value")
-    async def set_role_value(interaction: discord.Interaction, role: discord.Role, value: int):
+    async def set_role_value(
+        interaction: discord.Interaction, role: discord.Role, value: int
+    ):
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message(
                 "You do not have permission to use this command.", ephemeral=True
             )
             return
-        
+
         database.server.set_role_value(interaction.guild, role, value)
-        await interaction.response.send_message(f"Value of '{role}' set to '{value}'", ephemeral=True)
+        await interaction.response.send_message(
+            f"Value of '{role}' set to '{value}'", ephemeral=True
+        )
 
     @tree.command(name="get_guild_settings")
     async def get_guild_settings(interaction: discord.Interaction):
@@ -44,7 +60,7 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
             )
             return
         embed = discord.Embed(title=f"{interaction.guild.name} Settings")
-        
+
         server_document = database.server.get_server_document(interaction.guild)
 
         trust_text = ""
@@ -74,11 +90,15 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
                 "You do not have permission to use this command.", ephemeral=True
             )
             return
-        
+
         embed = discord.Embed(title=f"{helper_utils.format_member_string(member)}")
 
-        embed.add_field(name="Unweighted Trust", value=helper_utils.get_member_trust(member))
-        embed.add_field(name="Weighted Trust", value=helper_utils.get_weighted_member_trust(member))
+        embed.add_field(
+            name="Unweighted Trust", value=helper_utils.get_member_trust(member)
+        )
+        embed.add_field(
+            name="Weighted Trust", value=helper_utils.get_weighted_member_trust(member)
+        )
         embed.add_field(name="Value", value=helper_utils.get_member_value(member))
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -97,11 +117,18 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
             app_commands.Choice(name="Notes", value="notes"),
         ]
     )
-    async def set_log_channel(interaction: discord.Interaction, log_type: app_commands.Choice[str], channel: discord.TextChannel):
+    async def set_log_channel(
+        interaction: discord.Interaction,
+        log_type: app_commands.Choice[str],
+        channel: discord.TextChannel,
+    ):
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message(
                 "You do not have permission to use this command.", ephemeral=True
             )
             return
         database.server.set_log_channel(interaction.guild, log_type.value, channel)
-        await interaction.response.send_message(f"Log channel for '{log_type.name}' set to {channel.jump_url}", ephemeral=True)
+        await interaction.response.send_message(
+            f"Log channel for '{log_type.name}' set to {channel.jump_url}",
+            ephemeral=True,
+        )

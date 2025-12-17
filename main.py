@@ -14,7 +14,7 @@ if not MONGO_URI:
 TOKEN = os.getenv("TOKEN")
 if not TOKEN:
     raise ValueError("TOKEN environment variable is not set.")
-        
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
