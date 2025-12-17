@@ -2,7 +2,7 @@ import discord
 from database.database import Database
 from helper_utils import HelperUtils
 from collections import defaultdict
-from staff_vote_view import StaffVoteView
+from views.staff_vote_view import StaffVoteView
 import asyncio
 
 class UnbanRequestView(StaffVoteView):
