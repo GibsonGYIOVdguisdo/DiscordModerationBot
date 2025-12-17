@@ -5,7 +5,8 @@ from discord import app_commands
 from database.database import Database
 from events import setup_events
 from commands.setup import setup_commands
-from helper_utils import HelperUtils
+from utils.utils import HelperUtils
+from context import BotContext
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
@@ -24,7 +25,9 @@ tree = app_commands.CommandTree(client)
 database = Database(MONGO_URI)
 helper_utils = HelperUtils(client, database)
 
-setup_commands(tree, database, helper_utils, client)
-setup_events(client, tree, database, helper_utils)
+context = BotContext(database, helper_utils, client, tree)
+
+setup_commands(context)
+setup_events(context)
 
 client.run(TOKEN)

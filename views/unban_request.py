@@ -1,6 +1,5 @@
 import discord
-from database.database import Database
-from helper_utils import HelperUtils
+from context import BotContext
 from collections import defaultdict
 from views.staff_vote import StaffVote
 import asyncio
@@ -14,7 +13,7 @@ class UnbanRequest(StaffVote):
         executor: discord.Member,
         ban_entry: discord.BanEntry,
         reason: str,
-        helper_utils: HelperUtils,
+        context: BotContext,
         request_message: discord.Message = None,
     ):
         twenty_four_hours = 24 * 60 * 60
@@ -23,7 +22,7 @@ class UnbanRequest(StaffVote):
 
         minimum_trust_for_unban = 5
         super().__init__(
-            helper_utils,
+            context,
             twenty_four_hours,
             minimum_trust_for_unban,
             executor,
@@ -61,7 +60,7 @@ class UnbanRequest(StaffVote):
         await interaction.response.send_message(
             f"Unbanned {self.ban_entry.user}", ephemeral=True
         )
-        await self.helper_utils.log_punishment(
+        await self.helper_utils.logs.log_punishment(
             interaction.guild,
             "bans",
             self.vote_owner,

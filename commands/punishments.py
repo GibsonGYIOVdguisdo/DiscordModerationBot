@@ -1,18 +1,17 @@
 import discord
 from discord import app_commands
-from database.database import Database
-from helper_utils import HelperUtils
+from context import BotContext
 from datetime import datetime, timedelta, timezone
 from views.ban_request import BanRequest as BanRequestView
 from views.unban_request import UnbanRequest as UnbanRequestView
 
 
-def setup(
-    tree: app_commands.CommandTree,
-    database: Database,
-    helper_utils: HelperUtils,
-    client: discord.Client,
-):
+def setup(context: BotContext):
+    tree = context.tree
+    database = context.database
+    helper_utils = context.helper_utils
+    client = context.client
+
     @tree.command(
         name="betterwarn",
         description="Sends a warning to a user",
@@ -27,10 +26,10 @@ def setup(
         punished_member = member
         guild = interaction.guild
         executor = interaction.guild.get_member(interaction.user.id)
-        executor_trust = helper_utils.get_member_trust(executor)
-        punished_member_trust = helper_utils.get_member_trust(punished_member)
+        executor_trust = helper_utils.trust.get_member_trust(executor)
+        punished_member_trust = helper_utils.trust.get_member_trust(punished_member)
         if (
-            helper_utils.is_staff_member(executor)
+            helper_utils.member.is_staff_member(executor)
             and executor_trust > punished_member_trust
         ):
             try:
@@ -48,10 +47,10 @@ def setup(
                 print(e)
 
             evidence_type = evidence.value
-            evidence_embed = await helper_utils.get_evidence_embed(
+            evidence_embed = await helper_utils.messages.get_evidence_embed(
                 punished_member, evidence_type, interaction.channel
             )
-            await helper_utils.log_punishment(
+            await helper_utils.logs.log_punishment(
                 guild,
                 "warns",
                 executor,
@@ -92,10 +91,13 @@ def setup(
         guild = interaction.guild
         executor = interaction.guild.get_member(interaction.user.id)
         punished_member = member
-        executor_trust = helper_utils.get_member_trust(executor)
-        member_trust = helper_utils.get_member_trust(punished_member)
+        executor_trust = helper_utils.trust.get_member_trust(executor)
+        member_trust = helper_utils.trust.get_member_trust(punished_member)
 
-        if helper_utils.is_staff_member(executor) and executor_trust > member_trust:
+        if (
+            helper_utils.member.is_staff_member(executor)
+            and executor_trust > member_trust
+        ):
             duration_mapping = {"5m": 5, "6h": 360, "24h": 1440}
             mute_minutes = duration_mapping.get(duration.value)
             evidence_type = evidence.value
@@ -119,10 +121,10 @@ def setup(
             except Exception as e:
                 print(e)
 
-            evidence_embed = await helper_utils.get_evidence_embed(
+            evidence_embed = await helper_utils.messages.get_evidence_embed(
                 punished_member, evidence_type, interaction.channel
             )
-            await helper_utils.log_punishment(
+            await helper_utils.logs.log_punishment(
                 guild,
                 "mutes",
                 executor,
@@ -145,7 +147,7 @@ def setup(
     ):
         guild = interaction.guild
         executor = interaction.guild.get_member(interaction.user.id)
-        executor_trust = helper_utils.get_weighted_member_trust(executor)
+        executor_trust = helper_utils.trust.get_weighted_member_trust(executor)
         ban_entry = None
 
         try:
@@ -158,7 +160,7 @@ def setup(
             )
             return
 
-        if not helper_utils.is_staff_member(executor):
+        if not helper_utils.member.is_staff_member(executor):
             await interaction.response.send_message(
                 "You do not have permission", ephemeral=True
             )
@@ -175,7 +177,7 @@ def setup(
                 )
             except Exception as e:
                 print(e)
-            await helper_utils.log_punishment(
+            await helper_utils.logs.log_punishment(
                 interaction.guild, "bans", executor, ban_entry.user, "unban", reason
             )
         else:
@@ -183,7 +185,7 @@ def setup(
                 guild, "unban-requests"
             )
             approval_channel = guild.get_channel(approval_channel_id)
-            view = UnbanRequestView(executor, ban_entry, reason, helper_utils)
+            view = UnbanRequestView(executor, ban_entry, reason, context)
             view.request_message = await approval_channel.send("-", view=view)
             await view.update_request_message()
 
@@ -205,23 +207,23 @@ def setup(
         guild = interaction.guild
         executor = interaction.guild.get_member(interaction.user.id)
         punished_member = member
-        executor_trust = helper_utils.get_weighted_member_trust(executor)
-        member_value = helper_utils.get_member_value(punished_member)
+        executor_trust = helper_utils.trust.get_weighted_member_trust(executor)
+        member_value = helper_utils.value.get_member_value(punished_member)
         evidence_type = evidence.value
 
-        if not helper_utils.is_staff_member(executor):
+        if not helper_utils.member.is_staff_member(executor):
             await interaction.response.send_message(
                 "You do not have permission", ephemeral=True
             )
             return
 
-        if helper_utils.is_staff_member(punished_member):
+        if helper_utils.member.is_staff_member(punished_member):
             await interaction.response.send_message(
                 "You can not ban staff members", ephemeral=True
             )
             return
 
-        evidence_embed = await helper_utils.get_evidence_embed(
+        evidence_embed = await helper_utils.messages.get_evidence_embed(
             punished_member, evidence_type, interaction.channel
         )
         if executor_trust >= member_value:
@@ -232,15 +234,15 @@ def setup(
                 )
             except Exception as e:
                 print(e)
-            await helper_utils.log_punishment(
+            await helper_utils.logs.log_punishment(
                 guild, "bans", executor, punished_member, "ban", reason, evidence_embed
             )
         else:
             approval_channel_id = database.server.get_log_channel(guild, "ban-requests")
             approval_channel = guild.get_channel(approval_channel_id)
-            evidence_link = await helper_utils.log_evidence(guild, evidence_embed)
+            evidence_link = await helper_utils.logs.log_evidence(guild, evidence_embed)
             view = BanRequestView(
-                executor, punished_member, reason, evidence_link, helper_utils
+                executor, punished_member, reason, evidence_link, context
             )
             view.request_message = await approval_channel.send("-", view=view)
             await view.update_request_message()
@@ -259,8 +261,8 @@ def setup(
     ):
         guild = interaction.guild
         executor = interaction.guild.get_member(interaction.user.id)
-        executor_trust = helper_utils.get_member_trust(executor)
-        if not helper_utils.is_staff_member(executor):
+        executor_trust = helper_utils.trust.get_member_trust(executor)
+        if not helper_utils.member.is_staff_member(executor):
             await interaction.response.send_message(
                 "You do not have permission", ephemeral=True
             )
@@ -270,7 +272,7 @@ def setup(
                 "Please provide a member or member id", ephemeral=True
             )
             return
-        embed = helper_utils.get_punishment_embed(guild, member, int(member_id))
+        embed = helper_utils.logs.get_punishment_embed(guild, member, int(member_id))
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @tree.command(
@@ -283,11 +285,14 @@ def setup(
         executor = interaction.guild.get_member(interaction.user.id)
         punished_member = member
 
-        executor_trust = helper_utils.get_member_trust(executor)
-        member_trust = helper_utils.get_member_trust(punished_member)
+        executor_trust = helper_utils.trust.get_member_trust(executor)
+        member_trust = helper_utils.trust.get_member_trust(punished_member)
 
-        if helper_utils.is_staff_member(executor) and executor_trust > member_trust:
-            await helper_utils.log_punishment(
+        if (
+            helper_utils.member.is_staff_member(executor)
+            and executor_trust > member_trust
+        ):
+            await helper_utils.logs.log_punishment(
                 guild, "notes", executor, punished_member, "note", text, ""
             )
 

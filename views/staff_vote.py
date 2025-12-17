@@ -1,6 +1,5 @@
 import discord
-from database.database import Database
-from helper_utils import HelperUtils
+from context import BotContext
 from collections import defaultdict
 import asyncio
 
@@ -10,7 +9,7 @@ class StaffVote(discord.ui.View):
 
     def __init__(
         self,
-        helper_utils: HelperUtils,
+        context: BotContext,
         timeout: float,
         required_trust: int,
         vote_owner: discord.Member,
@@ -19,10 +18,13 @@ class StaffVote(discord.ui.View):
         super().__init__(timeout=timeout)
         self.vote_owner = vote_owner
         self.request_message = request_message
-        self.helper_utils = helper_utils
+        self.context = context
+        self.helper_utils = context.helper_utils
         self.approvers = set([vote_owner.id])
         self.deniers = set()
-        self.combined_trust = helper_utils.get_weighted_member_trust(vote_owner)
+        self.combined_trust = context.helper_utils.trust.get_weighted_member_trust(
+            vote_owner
+        )
         self.required_trust = required_trust
         self._auto_delete_task = asyncio.create_task(self.auto_delete_after_24h())
 
@@ -36,11 +38,11 @@ class StaffVote(discord.ui.View):
                 pass
 
     def register_approval(self, member: discord.Member):
-        self.combined_trust += self.helper_utils.get_weighted_member_trust(member)
+        self.combined_trust += self.helper_utils.trust.get_weighted_member_trust(member)
         self.approvers.add(member.id)
 
     def register_denial(self, member: discord.Member):
-        self.combined_trust -= self.helper_utils.get_weighted_member_trust(member)
+        self.combined_trust -= self.helper_utils.trust.get_weighted_member_trust(member)
         self.deniers.add(member.id)
 
     def has_member_voted(self, member: discord.Member):
@@ -61,7 +63,7 @@ class StaffVote(discord.ui.View):
                 "You have already voted on this.", ephemeral=True
             )
             return False
-        if not self.helper_utils.is_staff_member(voter):
+        if not self.helper_utils.member.is_staff_member(voter):
             await interaction.response.send_message(
                 "Only staff can vote on this.", ephemeral=True
             )

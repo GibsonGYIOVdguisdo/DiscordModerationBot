@@ -1,6 +1,5 @@
 import discord
-from database.database import Database
-from helper_utils import HelperUtils
+from context import BotContext
 from collections import defaultdict
 from views.staff_vote import StaffVote
 import asyncio
@@ -15,17 +14,19 @@ class BanRequest(StaffVote):
         punished_member: discord.Member,
         reason: str,
         evidence: str,
-        helper_utils: HelperUtils,
+        context: BotContext,
         request_message: discord.Message = None,
     ):
         twenty_four_hours = 24 * 60 * 60
         self.evidence = evidence
         self.punished_member = punished_member
         self.reason = reason
-        punished_member_value = helper_utils.get_member_value(punished_member)
+        punished_member_value = context.helper_utils.value.get_member_value(
+            punished_member
+        )
 
         super().__init__(
-            helper_utils,
+            context,
             twenty_four_hours,
             punished_member_value,
             executor,
@@ -60,7 +61,7 @@ class BanRequest(StaffVote):
 
     async def on_vote_approval_end(self, interaction: discord.Interaction):
         await self.punished_member.ban(delete_message_days=1)
-        await self.helper_utils.log_punishment(
+        await self.helper_utils.logs.log_punishment(
             interaction.guild,
             "bans",
             self.vote_owner,

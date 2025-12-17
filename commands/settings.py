@@ -1,15 +1,14 @@
 import discord
 from discord import app_commands
-from database.database import Database
-from helper_utils import HelperUtils
+from context import BotContext
 
 
-def setup(
-    tree: app_commands.CommandTree,
-    database: Database,
-    helper_utils: HelperUtils,
-    client: discord.Client,
-):
+def setup(context: BotContext):
+    tree = context.tree
+    database = context.database
+    helper_utils = context.helper_utils
+    client = context.client
+
     @tree.command(name="reset_guild_settings")
     async def reset_guild_settings(interaction: discord.Interaction):
         if not interaction.user.guild_permissions.administrator:
@@ -91,15 +90,18 @@ def setup(
             )
             return
 
-        embed = discord.Embed(title=f"{helper_utils.format_member_string(member)}")
+        embed = discord.Embed(
+            title=f"{helper_utils.member.format_member_string(member)}"
+        )
 
         embed.add_field(
-            name="Unweighted Trust", value=helper_utils.get_member_trust(member)
+            name="Unweighted Trust", value=helper_utils.trust.get_member_trust(member)
         )
         embed.add_field(
-            name="Weighted Trust", value=helper_utils.get_weighted_member_trust(member)
+            name="Weighted Trust",
+            value=helper_utils.trust.get_weighted_member_trust(member),
         )
-        embed.add_field(name="Value", value=helper_utils.get_member_value(member))
+        embed.add_field(name="Value", value=helper_utils.value.get_member_value(member))
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
