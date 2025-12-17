@@ -4,7 +4,7 @@ from helper_utils import HelperUtils
 from collections import defaultdict
 import asyncio
 
-class StaffVoteView(discord.ui.View):
+class StaffVote(discord.ui.View):
     request_message_content = "Vote started. Trust required: {trust_required}. Current trust: {current_trust}. Approve below."
     def __init__(self, helper_utils: HelperUtils, timeout: float, required_trust: int, vote_owner: discord.Member, request_message=None):
         super().__init__(timeout=timeout)

@@ -2,9 +2,6 @@ import discord
 from discord import app_commands
 from database.database import Database
 from helper_utils import HelperUtils
-from datetime import datetime, timedelta, timezone
-from views.ban_request_view import BanRequestView
-from views.unban_request_view import UnbanRequestView
 
 def setup(tree: app_commands.CommandTree, database: Database, helper_utils: HelperUtils, client: discord.Client):
     @tree.command(name="reset_guild_settings")

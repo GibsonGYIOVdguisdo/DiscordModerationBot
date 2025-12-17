@@ -2,10 +2,10 @@ import discord
 from database.database import Database
 from helper_utils import HelperUtils
 from collections import defaultdict
-from views.staff_vote_view import StaffVoteView
+from views.staff_vote import StaffVote
 import asyncio
 
-class UnbanRequestView(StaffVoteView):
+class UnbanRequest(StaffVote):
     request_message_content = "{executor} requested an unban for {punished_member}. Trust required: {trust_required}. Current trust: {current_trust}. Reason: '{reason}'. Approve below."
     
     def __init__(self, executor: discord.Member, ban_entry: discord.BanEntry, reason: str, helper_utils: HelperUtils, request_message:discord.Message=None):

@@ -3,8 +3,8 @@ from discord import app_commands
 from database.database import Database
 from helper_utils import HelperUtils
 from datetime import datetime, timedelta, timezone
-from views.ban_request_view import BanRequestView
-from views.unban_request_view import UnbanRequestView
+from views.ban_request import BanRequest as BanRequestView
+from views.unban_request import UnbanRequest as UnbanRequestView
 
 def setup(tree: app_commands.CommandTree, database: Database, helper_utils: HelperUtils, client: discord.Client):
     @tree.command(
