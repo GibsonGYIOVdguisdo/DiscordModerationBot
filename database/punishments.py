@@ -94,8 +94,3 @@ class Punishment:
 
         recent_warnings = list(self.punishments.find(filter))
         return len(recent_warnings) != 0
-
-    def get_server_document(self, guild: discord.Guild) -> object:
-        filter = {"guildId": guild.id}
-        server_document = self.servers.find_one(filter)
-        return server_document
