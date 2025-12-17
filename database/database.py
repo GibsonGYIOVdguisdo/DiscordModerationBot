@@ -3,8 +3,8 @@ import discord
 from datetime import datetime, timedelta, timezone
 from cachetools import cached, TTLCache
 from cachetools.keys import hashkey
-from database.punishment import Punishment
-from database.server import Server
+from database.punishments import Punishment
+from database.servers import Server
 
 class Database:
     value_cache = TTLCache(maxsize=100, ttl=3600)
