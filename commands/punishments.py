@@ -1,12 +1,12 @@
 import discord
 from discord import app_commands
-from database.database_handler import DatabaseHandler
+from database.database import Database
 from helper_utils import HelperUtils
 from datetime import datetime, timedelta, timezone
 from ban_request_view import BanRequestView
 from unban_request_view import UnbanRequestView
 
-def setup(tree: app_commands.CommandTree, database: DatabaseHandler, helper_utils: HelperUtils, client: discord.Client):
+def setup(tree: app_commands.CommandTree, database: Database, helper_utils: HelperUtils, client: discord.Client):
     @tree.command(
         name="betterwarn",
         description="Sends a warning to a user",
