@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from database import Database
+from database.database import Database
 from helper_utils import HelperUtils
 
 def setup_events(client: discord.Client, tree: app_commands.CommandTree, database: Database, helper_util: HelperUtils):
@@ -15,7 +15,7 @@ def setup_events(client: discord.Client, tree: app_commands.CommandTree, databas
 
     @client.event
     async def on_guild_join(guild):
-        database.create_server_document(guild)
+        database.server.create_server_document(guild)
 
     @client.event
     async def on_member_join(member: discord.Member):

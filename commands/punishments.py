@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from database import Database
+from database.database import Database
 from helper_utils import HelperUtils
 from datetime import datetime, timedelta, timezone
 from ban_request_view import BanRequestView
@@ -119,7 +119,7 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
                 print(e)
             await helper_utils.log_punishment(interaction.guild, "bans", executor, ban_entry.user, "unban", reason)
         else:
-            approval_channel_id = database.get_log_channel(guild, "unban-requests")
+            approval_channel_id = database.server.get_log_channel(guild, "unban-requests")
             approval_channel = guild.get_channel(approval_channel_id)
             view = UnbanRequestView(executor, ban_entry, reason, helper_utils)
             view.request_message = await approval_channel.send(
@@ -162,7 +162,7 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
                 print(e)
             await helper_utils.log_punishment(guild, "bans", executor, punished_member, "ban", reason, evidence_embed)
         else:
-            approval_channel_id = database.get_log_channel(guild, "ban-requests")
+            approval_channel_id = database.server.get_log_channel(guild, "ban-requests")
             approval_channel = guild.get_channel(approval_channel_id)
             evidence_link = await helper_utils.log_evidence(guild, evidence_embed)
             view = BanRequestView(executor, punished_member, reason, evidence_link, helper_utils)

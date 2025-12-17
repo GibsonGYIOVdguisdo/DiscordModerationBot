@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from database import Database
+from database.database import Database
 from helper_utils import HelperUtils
 
 import commands.settings

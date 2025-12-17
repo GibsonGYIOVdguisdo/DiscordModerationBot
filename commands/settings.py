@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from database import Database
+from database.database import Database
 from helper_utils import HelperUtils
 from datetime import datetime, timedelta, timezone
 from ban_request_view import BanRequestView
@@ -14,7 +14,7 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
                 "You do not have permission to use this command.", ephemeral=True
             )
             return
-        database.create_server_document(interaction.guild)
+        database.server.create_server_document(interaction.guild)
         await interaction.response.send_message(f"All guild settings have been reset", ephemeral=True)
     
     @tree.command(name="set_role_trust")
@@ -25,7 +25,7 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
             )
             return
         
-        database.set_role_trust(interaction.guild, role, trust)
+        database.server.set_role_trust(interaction.guild, role, trust)
         await interaction.response.send_message(f"Trust of '{role}' set to '{trust}'", ephemeral=True)
 
     @tree.command(name="set_role_value")
@@ -36,7 +36,7 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
             )
             return
         
-        database.set_role_value(interaction.guild, role, value)
+        database.server.set_role_value(interaction.guild, role, value)
         await interaction.response.send_message(f"Value of '{role}' set to '{value}'", ephemeral=True)
 
     @tree.command(name="get_guild_settings")
@@ -48,7 +48,7 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
             return
         embed = discord.Embed(title=f"{interaction.guild.name} Settings")
         
-        server_document = database.get_server_document(interaction.guild)
+        server_document = database.server.get_server_document(interaction.guild)
 
         trust_text = ""
         role_trusts = server_document.get("roleTrusts", {})
@@ -106,5 +106,5 @@ def setup(tree: app_commands.CommandTree, database: Database, helper_utils: Help
                 "You do not have permission to use this command.", ephemeral=True
             )
             return
-        database.set_log_channel(interaction.guild, log_type.value, channel)
+        database.server.set_log_channel(interaction.guild, log_type.value, channel)
         await interaction.response.send_message(f"Log channel for '{log_type.name}' set to {channel.jump_url}", ephemeral=True)

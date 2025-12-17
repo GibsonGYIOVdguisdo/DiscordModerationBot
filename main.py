@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import discord
 from discord import app_commands
-from database import Database
+from database.database import Database
 from events import setup_events
 from commands.setup import setup_commands
 from helper_utils import HelperUtils
