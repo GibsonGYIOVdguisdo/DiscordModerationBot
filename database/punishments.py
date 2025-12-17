@@ -1,13 +1,9 @@
 from pymongo import MongoClient
 import discord
 from datetime import datetime, timedelta, timezone
-from cachetools import cached, TTLCache
-from cachetools.keys import hashkey
 from models.punishment import Punishment
 
 class Punishment:
-    value_cache = TTLCache(maxsize=100, ttl=3600)
-    trust_cache = TTLCache(maxsize=100, ttl=3600)
 
     def __init__(self, mongo_client: MongoClient):
         self.mongo_client = mongo_client
