@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from database import Database
 from events import setup_events
-from commands import setup_commands
+from commands.setup import setup_commands
 from helper_utils import HelperUtils
 
 load_dotenv()
