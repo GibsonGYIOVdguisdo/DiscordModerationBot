@@ -1,5 +1,5 @@
 import discord
-from database.database import Database
+from database.database_handler import DatabaseHandler
 from helper_utils import HelperUtils
 from collections import defaultdict
 from staff_vote_view import StaffVoteView

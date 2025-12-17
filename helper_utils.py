@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from database.database import Database
+from database.database_handler import DatabaseHandler
 import asyncio
 from datetime import datetime, timedelta, timezone
 
@@ -12,7 +12,7 @@ class HelperUtils:
         app_commands.Choice(name="Trust me bro", value="trust-me-bro")
     ]
     
-    def __init__(self, client: discord.Client, database: Database):
+    def __init__(self, client: discord.Client, database: DatabaseHandler):
         self.client = client
         self.database = database
 

@@ -1,9 +1,9 @@
 import discord
 from discord import app_commands
-from database.database import Database
+from database.database_handler import DatabaseHandler
 from helper_utils import HelperUtils
 
-def setup_events(client: discord.Client, tree: app_commands.CommandTree, database: Database, helper_util: HelperUtils):
+def setup_events(client: discord.Client, tree: app_commands.CommandTree, database: DatabaseHandler, helper_util: HelperUtils):
     @client.event
     async def on_ready():
         print(f"Logged in as {client.user}")
