@@ -3,6 +3,7 @@ import discord
 from datetime import datetime, timedelta, timezone
 from cachetools import cached, TTLCache
 from cachetools.keys import hashkey
+from models.punishment import Punishment
 
 class Punishment:
     value_cache = TTLCache(maxsize=100, ttl=3600)
@@ -14,7 +15,7 @@ class Punishment:
         self.punishments = self.db["punishments"]
         
     def add_member_punishment(self, guild: discord.Guild, executing_member: discord.Member, punished_member: discord.Member, punishment: str, reason: str, evidence: str, approvers: list[str]=[]):
-        punishment_document = {
+        punishment_document: Punishment = {
             "guildId": guild.id,
             "memberId": punished_member.id,
             "punisherId": executing_member.id,

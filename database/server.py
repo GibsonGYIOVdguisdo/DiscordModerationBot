@@ -2,6 +2,7 @@ from pymongo import MongoClient
 import discord
 from cachetools import cached, TTLCache
 from cachetools.keys import hashkey
+from models.server import Server
 
 class Server:
     value_cache = TTLCache(maxsize=100, ttl=3600)
@@ -12,10 +13,13 @@ class Server:
         self.db = self.mongo_client['ModerationBot']
         self.servers = self.db["servers"]
         
-    def create_server_document(self, guild: discord.Guild):
+    def create_server_document(self, guild: discord.Guild) -> None:
         self.servers.find_one_and_delete({"guildId": guild.id})
-        server_document = {
-            "guildId": guild.id
+        server_document: Server = {
+            "guildId": guild.id,
+            "roleTrusts": {},
+            "roleValues": {},
+            "logChannels": {}
         }
         self.servers.insert_one(server_document)
 
@@ -69,7 +73,7 @@ class Server:
         log_channel = server_document["logChannels"].get(log_type, -1)
         return log_channel
     
-    def get_server_document(self, guild: discord.Guild) -> object:
+    def get_server_document(self, guild: discord.Guild) -> Server | None:
         filter = {"guildId": guild.id}
         server_document = self.servers.find_one(filter)
         return server_document
