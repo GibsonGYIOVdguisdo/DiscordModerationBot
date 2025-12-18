@@ -26,12 +26,10 @@ class MessageUtils:
         if type == "messages":
             messages = await self.get_last_n_messages(channel, member, max_fields)
             for message in messages[::-1]:
-                embed.add_field(
-                    name=message.jump_url, value=message.content, inline=False
-                )
+                message_text = message.content
                 for attachment in message.attachments:
-                    print(attachment)
-                    attachments.append(await attachment.to_file())
+                    message_text += "\n" + attachment.url
+                embed.add_field(name=message.jump_url, value=message_text, inline=False)
             asyncio.create_task(channel.delete_messages(messages))
         elif type == "ticket":
             embed.add_field(name="Ticket Channel", value=channel.jump_url, inline=False)
@@ -39,11 +37,12 @@ class MessageUtils:
                 async for message in channel.history(
                     limit=max_fields - 1, oldest_first=True
                 ):
-                    embed.add_field(
-                        name=str(message.author), value=message.content, inline=False
-                    )
+                    message_text = message.content
                     for attachment in message.attachments:
-                        attachments.append(await attachment.to_file())
+                        message_text += "\n" + attachment.url
+                    embed.add_field(
+                        name=str(message.author), value=message_text, inline=False
+                    )
         elif type == "trust-me-bro":
             return None
         elif type == "profile":
