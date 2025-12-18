@@ -30,6 +30,7 @@ class MessageUtils:
                     name=message.jump_url, value=message.content, inline=False
                 )
                 for attachment in message.attachments:
+                    print(attachment)
                     attachments.append(await attachment.to_file())
             asyncio.create_task(channel.delete_messages(messages))
         elif type == "ticket":
