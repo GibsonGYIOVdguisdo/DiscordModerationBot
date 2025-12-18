@@ -1,10 +1,12 @@
 import discord
 from datetime import datetime, timezone
-from utils.trust import TrustUtils
+from utils.trust import TrustUtil
+from models.punishment import Punishment
+from database.database import Database
 
 
 class MemberUtils:
-    def __init__(self, database, trust_utils=None):
+    def __init__(self, database: Database, trust_utils=None):
         self.database = database
         self.trust_utils = trust_utils
 
