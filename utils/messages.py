@@ -1,5 +1,6 @@
 import discord
 import asyncio
+import unicodedata
 
 
 class MessageUtils:
@@ -98,3 +99,23 @@ class MessageUtils:
 
         warning_text = "It looks like you might have been talking about punishments publicly. Please avoid talking about punishments (even if done by you) outside of staff chat and tickets to prevent problems."
         await member.send(warning_text)
+
+    @classmethod
+    def prepare_text_for_scanning(cls, text):
+        if len(text) == 0:
+            return ""
+        text = unicodedata.normalize("NFKC", text).casefold()
+        text = text.replace("1", "i")
+        text = text.replace("3", "e")
+        text = text.replace("!", "i")
+        final_text = text[0]
+        for c in text:
+            if c != final_text[-1]:
+                final_text += c
+
+        return final_text
+
+    @classmethod
+    def contains_banned_words(cls, message: discord.Message):
+        prepared_message = MessageUtils.prepare_text_for_scanning(message.content)
+        print(prepared_message)
