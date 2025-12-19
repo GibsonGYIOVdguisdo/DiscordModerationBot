@@ -105,8 +105,14 @@ class MessageUtils:
         if len(text) == 0:
             return ""
         text = unicodedata.normalize("NFKC", text).casefold()
+        text = text.replace("0", "o")
         text = text.replace("1", "i")
         text = text.replace("3", "e")
+        text = text.replace("4", "a")
+        text = text.replace("5", "s")
+        text = text.replace("6", "g")
+        text = text.replace("8", "b")
+        text = text.replace("9", "p")
         text = text.replace("!", "i")
         final_text = text[0]
         for c in text:
