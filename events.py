@@ -49,6 +49,9 @@ def setup_events(context: BotContext):
         if message.author.bot:
             return
 
+        print(message.content, helper_util.messages.contains_banned_words(message))
+        print("-")
+
         member = message.author
         if helper_util.messages.is_message_from_bot(message):
             await member.ban(reason="Sextortion bot")

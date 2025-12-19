@@ -124,4 +124,30 @@ class MessageUtils:
     @classmethod
     def contains_banned_words(cls, message: discord.Message):
         prepared_message = MessageUtils.prepare_text_for_scanning(message.content)
-        print(prepared_message)
+        max_char_distance = 2
+        blocked_words = ["gartter"]
+        for word in blocked_words:
+            word = MessageUtils.prepare_text_for_scanning(word)
+            if len(word) > len(prepared_message):
+                continue
+            pos_in_word = 0
+            chars_since_match = -1
+            last_was_symbol = False
+            for c in prepared_message:
+                chars_since_match += 1
+                if chars_since_match > max_char_distance and pos_in_word >= 0:
+                    pos_in_word = 0
+                    chars_since_match = 0
+                if c == word[pos_in_word]:
+                    chars_since_match = 0
+                    pos_in_word += 1
+                # If its a symbol treat it as a wildcard
+                elif c.isalnum() == False and last_was_symbol == False:
+                    chars_since_match = 0
+                    pos_in_word += 1
+                    last_was_symbol = True
+                else:
+                    last_was_symbol = False
+                if pos_in_word >= len(word):
+                    return True
+        return False
