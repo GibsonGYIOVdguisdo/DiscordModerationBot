@@ -21,8 +21,9 @@ class LogUtils:
             except:
                 punisher = "Left server"
             date = punishment.get("date")
+            id = punishment.get("_id", "ID INVALID")
             evidence = punishment.get("evidence", "No evidence provided")
-            punishment_text = f"**Reason**: {reason}\n**Punisher**: {punisher}\n**Date**: {date}\n**Evidence**: {evidence}"
+            punishment_text = f"**Reason**: {reason}\n**Punisher**: {punisher}\n**Date**: {date}\n**Evidence**: {evidence}\n**Id**: {id}"
             embed.add_field(
                 name=punishment_type.upper(), value=punishment_text, inline=False
             )
