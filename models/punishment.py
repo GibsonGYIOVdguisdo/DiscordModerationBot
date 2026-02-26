@@ -1,4 +1,5 @@
 from typing import TypedDict
+from models.feedback import Feedback
 
 
 class Punishment(TypedDict):
@@ -9,4 +10,5 @@ class Punishment(TypedDict):
     reason: str
     evidence: str
     approvers: list[str]
+    feedback: list[Feedback]
     date: str
