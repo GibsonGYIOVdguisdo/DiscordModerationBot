@@ -1,7 +1,9 @@
 from pymongo import MongoClient
 import discord
 from datetime import datetime, timedelta, timezone
-from models.punishment import Punishment
+from models.punishment import Punishment as PunishmentType
+from models.feedback import Feedback
+from bson.objectid import ObjectId
 
 
 class Punishment:
@@ -21,7 +23,7 @@ class Punishment:
         evidence: str,
         approvers: list[str] = [],
     ):
-        punishment_document: Punishment = {
+        punishment_document: PunishmentType = {
             "guildId": guild.id,
             "memberId": punished_member.id,
             "punisherId": executing_member.id,
@@ -94,3 +96,59 @@ class Punishment:
 
         recent_warnings = list(self.punishments.find(filter))
         return len(recent_warnings) != 0
+
+    def get_punishment(self, guild: discord.Guild, punishment_id) -> PunishmentType:
+        return self.punishments.find_one({"_id": ObjectId(punishment_id)})
+
+    def add_punishment_feedback(
+        self,
+        guild: discord.Guild,
+        punishment_id,
+        feedback_giver: discord.Member,
+        feedback: str,
+        removed_trust: int = 0,
+    ):
+        filter = {"_id": ObjectId(punishment_id)}
+        punishment: PunishmentType = self.punishments.find_one(filter)
+        if not punishment:
+            return False
+        if not punishment.get("guildId", 0) == guild.id:
+            return False
+        feedback_object: Feedback = {
+            "feedback": feedback,
+            "feedbackGiverId": feedback_giver.id,
+            "trustRemoved": removed_trust,
+            "date": datetime.now(),
+        }
+
+        punishment["feedback"] = punishment.get("feedback", [])
+        punishment["feedback"].append(feedback_object)
+
+        self.punishments.find_one_and_replace(filter, punishment)
+
+        return True
+
+    def get_given_punishments(
+        self, guild: discord.Guild, punisher: discord.Member, after: datetime = None
+    ):
+        filter = {
+            "guildId": guild.id,
+            "punisherId": punisher.id,
+        }
+
+        punishments = list(self.punishments.find(filter))
+
+        return punishments
+
+    def get_punishments_with_feedback(
+        self, guild: discord.Guild, punisher: discord.Member, after: datetime = None
+    ):
+        filter = {
+            "guildId": guild.id,
+            "punisherId": punisher.id,
+            "feedback": {"$elemMatch": {"date": {"$gte": after}}},
+        }
+
+        punishments = list(self.punishments.find(filter))
+
+        return punishments
