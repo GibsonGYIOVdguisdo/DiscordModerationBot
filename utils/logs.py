@@ -106,10 +106,8 @@ class LogUtils:
 
     async def give_mod_talk_warning(self, member: discord.Member, evidence: str):
         guild = member.guild
-        punisher = member.guild.get_member(
-            self.database
-        )  # placeholder, keep behavior in main HelperUtils
-        # Use punishment storage directly
+        punisher = member.guild.get_member(self.database)
+
         self.database.punishment.add_member_punishment(
             guild, punisher, member, "mod warn", "Punishment related messages", evidence
         )
