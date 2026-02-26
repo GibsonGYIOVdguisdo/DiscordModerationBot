@@ -15,11 +15,16 @@ class LogUtils:
         member_id: int = -1,
         after: datetime = None,
         show_ids: bool = False,
+        page=1,
     ) -> discord.Embed:
-        embed = discord.Embed(title=f"{member or member_id} punishments")
+        embed = discord.Embed(title=f"{member or member_id}'s punishments\nPage {page}")
         punishment_list = self.database.punishment.get_member_punishments(
             guild, member, member_id, after=after
-        )[-10:]
+        )
+        start = len(punishment_list) - (10 * page)
+        end = len(punishment_list) - (10 * (page - 1))
+        punishment_list = punishment_list[start:end]
+
         for punishment in punishment_list:
             punishment_type = f"**{punishment.get('punishment', 'unknown')}**"
             reason = punishment.get("reason", "")
