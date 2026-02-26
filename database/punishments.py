@@ -127,3 +127,28 @@ class Punishment:
         self.punishments.find_one_and_replace(filter, punishment)
 
         return True
+
+    def get_given_punishments(
+        self, guild: discord.Guild, punisher: discord.Member, after: datetime = None
+    ):
+        filter = {
+            "guildId": guild.id,
+            "punisherId": punisher.id,
+        }
+
+        punishments = list(self.punishments.find(filter))
+
+        return punishments
+
+    def get_punishments_with_feedback(
+        self, guild: discord.Guild, punisher: discord.Member, after: datetime = None
+    ):
+        filter = {
+            "guildId": guild.id,
+            "punisherId": punisher.id,
+            "feedback": {"$elemMatch": {"date": {"$gte": after}}},
+        }
+
+        punishments = list(self.punishments.find(filter))
+
+        return punishments
