@@ -1,18 +1,30 @@
 import discord
+from datetime import datetime
+from database.database import Database
 
 
 class LogUtils:
     def __init__(self, database, message_utils):
-        self.database = database
+        self.database: Database = database
         self.message_utils = message_utils
 
     def get_punishment_embed(
-        self, guild: discord.Guild, member: discord.Member = None, member_id: int = -1
+        self,
+        guild: discord.Guild,
+        member: discord.Member = None,
+        member_id: int = -1,
+        after: datetime = None,
+        show_ids: bool = False,
+        page=1,
     ) -> discord.Embed:
-        embed = discord.Embed(title=f"{member or member_id} punishments")
+        embed = discord.Embed(title=f"{member or member_id}'s punishments\nPage {page}")
         punishment_list = self.database.punishment.get_member_punishments(
-            guild, member, member_id
-        )[-10:]
+            guild, member, member_id, after=after
+        )
+        start = len(punishment_list) - (10 * page)
+        end = len(punishment_list) - (10 * (page - 1))
+        punishment_list = punishment_list[start:end]
+
         for punishment in punishment_list:
             punishment_type = f"**{punishment.get('punishment', 'unknown')}**"
             reason = punishment.get("reason", "")
@@ -23,7 +35,9 @@ class LogUtils:
             date = punishment.get("date")
             id = punishment.get("_id", "ID INVALID")
             evidence = punishment.get("evidence", "No evidence provided")
-            punishment_text = f"**Reason**: {reason}\n**Punisher**: {punisher}\n**Date**: {date}\n**Evidence**: {evidence}\n**Id**: {id}"
+            punishment_text = f"**Reason**: {reason}\n**Punisher**: {punisher}\n**Date**: {date}\n**Evidence**: {evidence}"
+            if show_ids:
+                punishment_text += f"\n**Id**: {id}"
             embed.add_field(
                 name=punishment_type.upper(), value=punishment_text, inline=False
             )
@@ -92,10 +106,8 @@ class LogUtils:
 
     async def give_mod_talk_warning(self, member: discord.Member, evidence: str):
         guild = member.guild
-        punisher = member.guild.get_member(
-            self.database
-        )  # placeholder, keep behavior in main HelperUtils
-        # Use punishment storage directly
+        punisher = member.guild.get_member(self.database)
+
         self.database.punishment.add_member_punishment(
             guild, punisher, member, "mod warn", "Punishment related messages", evidence
         )
