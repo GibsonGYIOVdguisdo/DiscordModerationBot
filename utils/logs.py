@@ -31,7 +31,7 @@ class LogUtils:
             try:
                 punisher = guild.get_member(punishment.get("punisherId", 0))
             except:
-                punisher = "Left server"
+                punisher = punishment.get("punisherId", 0)
             date = punishment.get("date")
             id = punishment.get("_id", "ID INVALID")
             evidence = punishment.get("evidence", "No evidence provided")
