@@ -1,17 +1,24 @@
 import discord
+from datetime import datetime
+from database.database import Database
 
 
 class LogUtils:
     def __init__(self, database, message_utils):
-        self.database = database
+        self.database: Database = database
         self.message_utils = message_utils
 
     def get_punishment_embed(
-        self, guild: discord.Guild, member: discord.Member = None, member_id: int = -1
+        self,
+        guild: discord.Guild,
+        member: discord.Member = None,
+        member_id: int = -1,
+        after: datetime = None,
+        show_ids: bool = False,
     ) -> discord.Embed:
         embed = discord.Embed(title=f"{member or member_id} punishments")
         punishment_list = self.database.punishment.get_member_punishments(
-            guild, member, member_id
+            guild, member, member_id, after=after
         )[-10:]
         for punishment in punishment_list:
             punishment_type = f"**{punishment.get('punishment', 'unknown')}**"
@@ -23,7 +30,9 @@ class LogUtils:
             date = punishment.get("date")
             id = punishment.get("_id", "ID INVALID")
             evidence = punishment.get("evidence", "No evidence provided")
-            punishment_text = f"**Reason**: {reason}\n**Punisher**: {punisher}\n**Date**: {date}\n**Evidence**: {evidence}\n**Id**: {id}"
+            punishment_text = f"**Reason**: {reason}\n**Punisher**: {punisher}\n**Date**: {date}\n**Evidence**: {evidence}"
+            if show_ids:
+                punishment_text += f"\n**Id**: {id}"
             embed.add_field(
                 name=punishment_type.upper(), value=punishment_text, inline=False
             )

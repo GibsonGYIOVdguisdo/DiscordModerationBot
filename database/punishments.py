@@ -41,8 +41,16 @@ class Punishment:
         member: discord.Member = None,
         member_id=-1,
         punisher: discord.Member = None,
+        after: datetime = None,
     ) -> list[object]:
-        filter = {"guildId": guild.id}
+
+        filter = {
+            "guildId": guild.id,
+        }
+
+        if after:
+            filter["date"] = {"$gte": after}
+
         if member or member_id:
             if member:
                 member_id = member.id

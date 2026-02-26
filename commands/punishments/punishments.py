@@ -1,5 +1,6 @@
 import discord
 from context import BotContext
+from datetime import datetime, timezone, timedelta
 
 
 def setup(context: BotContext):
@@ -13,6 +14,8 @@ def setup(context: BotContext):
         interaction: discord.Interaction,
         member: discord.Member = None,
         member_id: str = "-1",
+        all_punishments: bool = False,
+        show_ids: bool = False,
     ):
         guild = interaction.guild
         executor = interaction.guild.get_member(interaction.user.id)
@@ -27,5 +30,16 @@ def setup(context: BotContext):
                 "Please provide a member or member id", ephemeral=True
             )
             return
-        embed = helper_utils.logs.get_punishment_embed(guild, member, int(member_id))
+
+        after = None
+        if not all_punishments:
+            after = datetime.now(timezone.utc) - timedelta(days=14)
+
+        embed = helper_utils.logs.get_punishment_embed(
+            guild,
+            member,
+            int(member_id),
+            after=after,
+            show_ids=show_ids,
+        )
         await interaction.response.send_message(embed=embed, ephemeral=True)
