@@ -105,6 +105,16 @@ class Punishment:
         recent_warnings = list(self.punishments.find(filter))
         return len(recent_warnings) != 0
 
+    def has_suspicion_check(self, guild: discord.Guild, member: discord.Member):
+        filter = {
+            "guildId": guild.id,
+            "memberId": member.id,
+            "reason": "Suspicious Member/Bot",
+        }
+
+        recent_checks = list(self.punishments.find(filter))
+        return len(recent_checks) != 0
+
     def get_punishment(self, guild: discord.Guild, punishment_id) -> PunishmentType:
         return self.punishments.find_one({"_id": ObjectId(punishment_id)})
 
