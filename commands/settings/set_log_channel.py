@@ -17,6 +17,7 @@ def setup(context: BotContext):
             app_commands.Choice(name="Ban Requests", value="ban-requests"),
             app_commands.Choice(name="Unban Requests", value="unban-requests"),
             app_commands.Choice(name="Notes", value="notes"),
+            app_commands.Choice(name="Suspicious Members", value="suspicious-members"),
         ]
     )
     async def set_log_channel(
