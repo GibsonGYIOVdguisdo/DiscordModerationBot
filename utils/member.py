@@ -1,5 +1,6 @@
 import discord
 from database.database import Database
+from datetime import datetime, timezone, timedelta
 
 
 class MemberUtils:
@@ -25,6 +26,16 @@ class MemberUtils:
         elif member.name.startswith("butt") and member.name[4:].isdigit():
             return True
         elif member.name.startswith("hellenbutt") and member.name[10:].isdigit():
+            return True
+        return False
+
+    def is_suspicious(self, member: discord.User) -> bool:
+        one_week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+        if member.created_at > one_week_ago:
+            return True
+        if member.name[-4:].isnumeric():
+            return True
+        if not member.avatar:
             return True
         return False
 
