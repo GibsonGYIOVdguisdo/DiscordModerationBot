@@ -22,6 +22,8 @@ def setup_events(context: BotContext):
 
     async def check_if_suspicious_join(member: discord.Member):
         if helper_util.member.is_suspicious(member):
+            if database.punishment.has_suspicion_check(member.guild, member):
+                return False
             guild = member.guild
             suspicious_member_channel_id = database.server.get_log_channel(
                 member.guild, "suspicious-members"
@@ -32,6 +34,15 @@ def setup_events(context: BotContext):
             )
             evidence_link = await helper_util.logs.log_evidence(guild, evidence_embed)
             executor = member.guild.get_member(client.user.id)
+            await helper_util.logs.log_punishment(
+                guild,
+                "notes",
+                executor,
+                member,
+                "note",
+                "Suspicious Member/Bot",
+                evidence_link=evidence_link,
+            )
             view = SuspiciousMemberView(
                 executor, member, "Suspicious Member/Likely Bot", evidence_link, context
             )
