@@ -52,7 +52,6 @@ class MessageUtils:
             embed.add_field(name="Username", value=member.name, inline=False)
             embed.add_field(name="Display Name", value=member.global_name, inline=False)
             embed.add_field(name="Nickname", value=member.nick, inline=False)
-            embed.add_field(name="Status", value=member.status or "None", inline=False)
             embed.add_field(
                 name="Creation Date",
                 value=f"{member.created_at} ({datetime.now(timezone.utc) - member.created_at} ago)",
