@@ -16,6 +16,7 @@ class HelperUtils:
         app_commands.Choice(name="This Ticket", value="ticket"),
         app_commands.Choice(name="Profile", value="profile"),
         app_commands.Choice(name="Trust me bro", value="trust-me-bro"),
+        app_commands.Choice(name="Profile and Messages", value="profile-and-messages"),
     ]
 
     def __init__(self, client: discord.Client, database: Database):

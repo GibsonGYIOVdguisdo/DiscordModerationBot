@@ -47,7 +47,7 @@ class MessageUtils:
                     )
         elif type == "trust-me-bro":
             return None
-        elif type == "profile":
+        elif type == "profile" or "profile-and-messages":
             embed.set_image(url=member.display_avatar.url)
             embed.add_field(name="Username", value=member.name, inline=False)
             embed.add_field(name="Display Name", value=member.global_name, inline=False)
@@ -57,6 +57,14 @@ class MessageUtils:
                 value=f"{member.created_at} ({datetime.now(timezone.utc) - member.created_at} ago)",
                 inline=False,
             )
+            if type == "profile-and-messages":
+                message_text = ""
+                messages = await self.get_last_n_messages(channel, member, 10)
+                for message in messages[::-1]:
+                    message_text += message.content + "\n"
+                    for attachment in message.attachments:
+                        message_text += "\n" + attachment.url
+                embed.add_field(name="Recent Messages", value=message_text)
         return embed
 
     def is_message_from_bot(self, message: discord.Message) -> bool:
