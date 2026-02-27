@@ -33,7 +33,7 @@ class MemberUtils:
         one_week_ago = datetime.now(timezone.utc) - timedelta(days=7)
         if member.created_at > one_week_ago:
             return True
-        if member.display_name[-4:].isnumeric():
+        if member.name[-4:].isnumeric():
             return True
         if not member.avatar:
             return True
