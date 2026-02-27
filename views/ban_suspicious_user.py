@@ -6,7 +6,7 @@ import asyncio
 
 
 class BanSuspiciousMembers(StaffVote):
-    request_message_content = "{punished_member} has been flagged as suspicious. Trust required: {trust_required}. Current trust: {current_trust}."
+    request_message_content = "{punished_member} has been flagged as suspicious. Approve this if they should be banned. Trust required: {trust_required}. Current trust: {current_trust}."
 
     def __init__(
         self,
