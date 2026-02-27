@@ -64,7 +64,7 @@ def setup_events(context: BotContext):
             )
             suspicious_member_channel = guild.get_channel(suspicious_member_channel_id)
             evidence_embed = await helper_util.messages.get_evidence_embed(
-                member, "profile"
+                member, "profile-and-messages", message.channel
             )
             evidence_link = await helper_util.logs.log_evidence(guild, evidence_embed)
             executor = member.guild.get_member(client.user.id)
