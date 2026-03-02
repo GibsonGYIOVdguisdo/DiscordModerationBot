@@ -13,6 +13,7 @@ def setup(context: BotContext):
             app_commands.Choice(name="Warns", value="warns"),
             app_commands.Choice(name="Mutes", value="mutes"),
             app_commands.Choice(name="Evidence", value="evidence"),
+            app_commands.Choice(name="Renames", value="renames"),
             app_commands.Choice(name="Bans", value="bans"),
             app_commands.Choice(name="Ban Requests", value="ban-requests"),
             app_commands.Choice(name="Unban Requests", value="unban-requests"),

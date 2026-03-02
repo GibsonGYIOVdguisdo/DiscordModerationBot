@@ -7,6 +7,7 @@ from commands.punishments.warn import setup as setup_warn
 from commands.punishments.note import setup as setup_note
 from commands.punishments.punishments import setup as setup_punishments
 from commands.punishments.feedback import setup as setup_feedback
+from commands.punishments.rename import setup as setup_rename
 
 from commands.settings.reset import setup as setup_reset
 from commands.settings.role_trust import setup as setup_role_trust
@@ -24,6 +25,7 @@ def setup_commands(context: BotContext):
     setup_note(context)
     setup_punishments(context)
     setup_feedback(context)
+    setup_rename(context)
 
     setup_reset(context)
     setup_role_trust(context)
